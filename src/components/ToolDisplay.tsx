@@ -107,12 +107,14 @@ export function ToolDisplay({
       />
       {toolName === "AskUser" && (
         <AskPrompt
+          key={activeCall.toolCallId}
           modelInput={validationResult.data as AskUserModelInput}
           onSubmit={submitOutput}
         />
       )}
       {toolName === "Bash" && (
         <BashPrompt
+          key={activeCall.toolCallId}
           modelInput={validationResult.data as BashModelInput}
           onSubmit={submitOutput}
         />
