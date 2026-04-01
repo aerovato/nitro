@@ -1,0 +1,92 @@
+{
+  "name": "@aerovato/nitro",
+  "version": "1.0.0",
+  "description": "A tiny and efficient Bash agent for the command line",
+  "author": "kevinMEH",
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": {
+    "nitro": "dist/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aerovato/nitro.git"
+  },
+  "homepage": "https://github.com/aerovato/nitro#readme",
+  "bugs": {
+    "url": "https://github.com/aerovato/nitro/issues"
+  },
+  "keywords": [
+    "cli",
+    "ai",
+    "llm",
+    "shell",
+    "bash",
+    "terminal",
+    "command-line",
+    "natural-language",
+    "assistant",
+    "harness",
+    "agent",
+    "agentic",
+    "openai",
+    "codex",
+    "chatgpt",
+    "anthropic",
+    "claude",
+    "claude-code",
+    "opencode",
+    "gemini",
+    "gemini-cli",
+    "vibe-coding"
+  ],
+  "files": [
+    "dist"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "bun build src/index.ts --outdir dist --target node",
+    "clean": "rm -rf dist",
+    "dev": "bun run src/index.ts",
+    "lint": "tsc --noEmit && eslint .",
+    "format": "prettier --write .",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "prepare": "husky"
+  },
+  "dependencies": {
+    "@ai-sdk/anthropic": "^3.0.64",
+    "@ai-sdk/openai": "^3.0.49",
+    "@ai-sdk/openai-compatible": "^2.0.37",
+    "@inkjs/ui": "^2.0.0",
+    "ai": "^6.0.141",
+    "chalk": "^5.6.2",
+    "ink": "^6.8.0",
+    "ink-text-input": "^6.0.0",
+    "is-unicode-supported": "^2.1.0",
+    "react": "^19.2.4",
+    "react-devtools-core": "^7.0.1",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/node": "^20.19.37",
+    "@types/react": "^19.2.14",
+    "eslint": "^10.1.0",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "globals": "^17.4.0",
+    "husky": "^9.1.7",
+    "ink-testing-library": "^4.0.0",
+    "memfs": "^4.57.1",
+    "prettier": "^3.5.3",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.57.2",
+    "vitest": "^4.1.2"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  }
+}
