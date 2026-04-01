@@ -1,6 +1,6 @@
 {
   "name": "@aerovato/nitro",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A tiny and efficient Bash agent for the command line",
   "author": "kevinMEH",
   "type": "module",
