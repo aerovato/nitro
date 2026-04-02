@@ -1,5 +1,9 @@
 #!/usr/bin/env node
 
+if (process.env.NODE_ENV === "production") {
+  globalThis.AI_SDK_LOG_WARNINGS = false;
+}
+
 import { runSettingsScreen } from "./screens/SettingsScreen";
 import { runProviderScreen } from "./screens/ProviderRouter";
 import { runChatScreen } from "./screens/ChatScreen";
