@@ -12,6 +12,7 @@ import {
   waitFor,
 } from "./utils";
 import type { BashModelInput } from "../src/tools/bash";
+import { EULA_VERSION } from "../src/eula";
 
 const mockExit = vi.fn();
 
@@ -33,6 +34,7 @@ function renderBashPrompt(
 ) {
   const mockConfig: ChatConfig = {
     settings: {
+      agreedToEula: EULA_VERSION,
       setupCompleted: true,
       alwaysConfirm: options.alwaysConfirm ?? false,
       showThinking: false,

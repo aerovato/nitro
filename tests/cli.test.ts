@@ -20,8 +20,17 @@ vi.mock("../src/screens/ProviderRouter", () => ({
   runProviderScreen: (...args: unknown[]) => mockRunProviderScreen(...args),
 }));
 
+vi.mock("../src/screens/EulaScreen", () => ({
+  runEulaScreen: () => Promise.resolve(true),
+}));
+
 vi.mock("../src/logic/conversation", () => ({
   getLastConversationFilename: () => mockGetLastConversationFilename(),
+}));
+
+vi.mock("../src/logic/settings", () => ({
+  loadSettings: () => ({ agreedToEula: 1 }),
+  isEulaAgreed: () => true,
 }));
 
 vi.mock("../src/utils", () => ({

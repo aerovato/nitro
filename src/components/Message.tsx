@@ -18,16 +18,15 @@ function AssistantMessage({
   message: AssistantModelMessage;
 }): React.ReactElement {
   const { settings } = useChatConfig();
-  const parts: (ReasoningPart | TextPart)[] = [];
   const content = message.content;
-  if (typeof content === "string") {
-    parts.push({ type: "text", text: content });
-  } else {
-    parts.push(
-      ...content.filter(
-        part => part.type === "text" || part.type === "reasoning",
-      ),
-    );
+  let parts: (ReasoningPart | TextPart)[] =
+    typeof content === "string"
+      ? [{ type: "text", text: content }]
+      : content.filter(
+          part => part.type === "text" || part.type === "reasoning",
+        );
+  if (!settings.showThinking) {
+    parts = parts.filter(part => part.type !== "reasoning");
   }
   return (
     <Box
@@ -39,7 +38,7 @@ function AssistantMessage({
     >
       {parts.length === 0 && <CustomText dimColor>Generating...</CustomText>}
       {parts.map((part, i) => {
-        if (part.type === "reasoning" && settings.showThinking) {
+        if (part.type === "reasoning") {
           return <ReasoningPartBlock key={i} text={part.text} />;
         } else if (part.type === "text") {
           return <TextPartBlock key={i} text={part.text} />;
@@ -111,9 +110,7 @@ function ToolMessage({
         if (tool) {
           return (
             <React.Fragment key={i}>
-              {tool.formatOutput(
-                "value" in part.output ? part.output.value : undefined,
-              )}
+              {tool.formatOutput(part.output)}
             </React.Fragment>
           );
         }

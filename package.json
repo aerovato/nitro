@@ -47,7 +47,7 @@
     "node": ">=20"
   },
   "scripts": {
-    "build": "bun build src/index.ts --outdir dist --target node",
+    "build": "bun build src/index.ts --outdir dist --target node --production",
     "clean": "rm -rf dist",
     "dev": "bun run src/index.ts",
     "lint": "tsc --noEmit && eslint .",
