@@ -110,9 +110,7 @@ function ToolMessage({
         if (tool) {
           return (
             <React.Fragment key={i}>
-              {tool.formatOutput(
-                "value" in part.output ? part.output.value : undefined,
-              )}
+              {tool.formatOutput(part.output)}
             </React.Fragment>
           );
         }
