@@ -7,9 +7,19 @@ if (process.env.NODE_ENV === "production") {
 import { runSettingsScreen } from "./screens/SettingsScreen";
 import { runProviderScreen } from "./screens/ProviderRouter";
 import { runChatScreen } from "./screens/ChatScreen";
+import { runEulaScreen } from "./screens/EulaScreen";
 import { outputError } from "./utils";
 import { getLastConversationFilename } from "./logic/conversation";
+import { loadSettings, isEulaAgreed } from "./logic/settings";
 import { dangerouslyEnableExecutionDoNotInvokeOrYourSystemWillGetNuked } from "./tools/bash";
+
+async function checkEula(): Promise<boolean> {
+  const settings = loadSettings();
+  if (isEulaAgreed(settings)) {
+    return true;
+  }
+  return runEulaScreen();
+}
 
 function printUsage(): void {
   const lines = [
@@ -36,6 +46,11 @@ function printUsage(): void {
 }
 
 async function main(args: string[]): Promise<void> {
+  const eulaAccepted = await checkEula();
+  if (!eulaAccepted) {
+    process.exit(1);
+  }
+
   if (args.length === 0 || args[0] === "help") {
     printUsage();
     return;

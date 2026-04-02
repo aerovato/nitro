@@ -3,6 +3,7 @@ import { join } from "node:path";
 import { cwd } from "node:process";
 import { z } from "zod";
 import { APP_DATA_DIR, ensureAppDataDir } from "./config";
+import { EULA_VERSION } from "../eula";
 
 const BUILTIN_SYSTEM_PROMPT_BODY = `
 # Workflow
@@ -63,6 +64,7 @@ const SYSTEM_PROMPT_TEMPLATE_FILE = join(
 );
 
 export const SettingsSchema = z.object({
+  agreedToEula: z.number().nullable().default(null),
   setupCompleted: z.boolean().default(false),
   alwaysConfirm: z.boolean().default(false),
   showThinking: z.boolean().default(false),
@@ -76,6 +78,10 @@ export type ReasoningEffort = z.infer<
 >;
 
 export const DEFAULT_SETTINGS: Settings = SettingsSchema.parse({});
+
+export function isEulaAgreed(settings: Settings): boolean {
+  return settings.agreedToEula === EULA_VERSION;
+}
 
 export interface SettingMeta {
   key: keyof Settings;
