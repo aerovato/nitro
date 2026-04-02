@@ -20,8 +20,7 @@ export function dangerouslyEnableExecutionDoNotInvokeOrYourSystemWillGetNuked():
 }
 
 const BASH_TOOL_DESCRIPTION = `
-Run Bash commands on behalf of the user to fulfill their request.
-Behavior tags and risk levels are shown to the user to help them assess the command. Risky commands require user approval.
+Run Bash commands on behalf of the user to fulfill their request. Behavior tags and risk levels are shown to the user to help them assess the command.
 
 Tool Usage Guidelines:
 - Bash commands are executed in a new shell every time; navigation context will not persist across tool calls
@@ -37,13 +36,14 @@ Behavior Tags:
 - Behavior tags help users understand how a command behaves
 - Multiple tags can be selected for one command
 - Values and explanations:
-  - Safe: Command has no consequential effects; use for Read Only commands only
-  - Reversible: Command has effects but can be reversed
-  - Write: Command will write data
-  - Delete: Command will delete data
-  - Overwrite: Command may overwrite existing data
-  - Side Effects: Command may cause unintended side effects
-  - Exfiltration: Command may exfiltrate data
+  - Safe: Has no consequential effects
+  - Reversible: Has effects but can be reversed
+  - Write: Will write data
+  - Delete: Will delete data
+  - Overwrite: May overwrite existing data
+  - Side Effects: May cause unintended side effects
+  - Exfiltration: May exfiltrate data
+- **Do not make up your own values. Only select from the enums above.**
 
 Risk level:
 - Assign a risk level. High-risk commands require user approval.
@@ -97,7 +97,7 @@ const ModelInputSchema = z.object({
   explanation: z
     .string()
     .describe(
-      "An explanation of what the command does. If the command does not obviously achieve the user's request, explain why you are running it.",
+      "A short explanation of what the command does (2-3 sentences). If the command does not obviously achieve the user's request, explain why you are running it.",
     ),
   riskLevel: RiskLevelSchema.describe(
     "A label describing how risky the command is.",
@@ -111,7 +111,7 @@ const ModelInputSchema = z.object({
     .max(120000)
     .default(30000)
     .describe(
-      "Timeout in milliseconds. Default: 30 seconds. Max: 2 minutes. The command will be killed if it exceeds the timeout. Ask the user run long-running commands manually.",
+      "Timeout in milliseconds. Default: 30 seconds. Max: 2 minutes. Ask the user run long-running commands manually.",
     ),
 });
 

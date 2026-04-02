@@ -20,11 +20,9 @@ Example Usage:
 Context:
 - The user wants to remove all "old files" inside a projects folder to reclaim disk space
 - The definition of "old" is ambiguous. What is old? 3 months? 1 year?
-- In addition, you notice that most of the projects are full-stack projects with heavy node_modules folders
-- It may be a better idea to delete only the node_modules folders as they take up a majority of space
+- In addition, you notice that most of the disk space is occupied by node_modules folders; may be better to only delete node_modules
 
-Agent Action:
-- The agent will now ask two questions:
+Agent Action: Ask two questions:
 
 "What is the specific timeframe for 'old'?"
 Choices:
@@ -32,7 +30,7 @@ Choices:
 - 6 months
 - 1 year
 
-"Should I remove entire projects or only the node_modules folders? Note that the node_modules folders are likely taking up a majority of space. They are safe to delete because dependencies can be reinstalled later."
+"Should I remove entire projects or only the node_modules folders? The node_modules folders are taking up a majority of the space."
 Choices:
 - Remove entire projects
 - Remove only node_modules folders
@@ -61,7 +59,7 @@ const QuestionSchema = z.object({
       }),
     )
     .describe(
-      "Choices the user can select to answer the question. Limit choices to 2 to 4. Provide only the most common choices; if none are adequate, the user can type their own answer. The user may select only one choice per question.",
+      "Choices the user can select to answer the question. Limit choices to 2-4. Provide only the most common choices; if none are adequate, the user can type their own answer. The user may select only one choice per question.",
     ),
 });
 
