@@ -14,6 +14,7 @@ import { generateCompletion, transformInput } from "../logic/llm";
 import { saveConversation, loadConversation } from "../logic/conversation";
 import { exitWithError } from "../utils";
 import { createToolSet } from "../tools";
+import { useTokenUsage } from "../components";
 
 export type NonSystemModelMessage = Exclude<ModelMessage, SystemModelMessage>;
 
@@ -65,6 +66,7 @@ export function useChatState({
     initialFilename ?? null,
   );
   const toolSet = React.useMemo(() => createToolSet(), []);
+  const { addUsage } = useTokenUsage();
 
   const send = React.useCallback(
     async (input: string | ToolResultPart[]) => {
@@ -134,6 +136,11 @@ export function useChatState({
 
         const officialMessages = (await result.response).messages;
         const toolCalls = await result.toolCalls;
+        const usage = await result.usage;
+
+        if (usage) {
+          addUsage(usage);
+        }
 
         completedMessages = [...completedMessages, ...officialMessages];
         if (toolCalls.length > 0) {
@@ -150,7 +157,7 @@ export function useChatState({
         throw new Error("Error: generateCompletion() failed to execute.");
       }
     },
-    [provider, settings, systemPrompt, state, toolSet],
+    [provider, settings, systemPrompt, state, toolSet, addUsage],
   );
 
   const submitMessage = React.useCallback(

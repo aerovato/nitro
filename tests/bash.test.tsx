@@ -38,6 +38,7 @@ function renderBashPrompt(
       setupCompleted: true,
       alwaysConfirm: options.alwaysConfirm ?? false,
       showThinking: false,
+      showTokenSummary: false,
       maxOutputTokens: 16000,
       reasoningEffort: "med",
     },

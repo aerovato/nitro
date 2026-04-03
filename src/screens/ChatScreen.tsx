@@ -2,7 +2,13 @@ import * as React from "react";
 import { Box, useApp } from "ink";
 
 import { runProviderDefaultScreen } from "./ProviderDefaultScreen";
-import { ChatBox, MessageList, ToolDisplay } from "../components";
+import {
+  ChatBox,
+  MessageList,
+  ToolDisplay,
+  TokenUsageProvider,
+  useTokenUsage,
+} from "../components";
 
 import { getDefaultProvider } from "../logic/provider";
 import { useChatState } from "../hooks/useChatState";
@@ -20,7 +26,7 @@ interface ChatScreenProps {
   hidePreviousMessages?: boolean;
 }
 
-export function ChatScreen({
+function ChatScreenInner({
   initialRequest,
   quitOnFinish,
   initialFilename,
@@ -28,11 +34,33 @@ export function ChatScreen({
 }: ChatScreenProps): React.ReactElement | null {
   const { exit } = useApp();
   const chatConfig = useChatConfig();
+  const { usage } = useTokenUsage();
   const { state, submitMessage, submitToolResults } = useChatState({
     ...chatConfig,
     initialFilename,
   });
   const messages = state.messages;
+
+  const usageRef = React.useRef(usage);
+  const showTokenSummaryRef = React.useRef(
+    chatConfig.settings.showTokenSummary,
+  );
+  React.useEffect(() => {
+    usageRef.current = usage;
+    showTokenSummaryRef.current = chatConfig.settings.showTokenSummary;
+  }, [usage, chatConfig.settings.showTokenSummary]);
+
+  React.useEffect(() => {
+    return () => {
+      if (showTokenSummaryRef.current && usageRef.current.inputTokens > 0) {
+        console.log("\nToken Usage Summary:");
+        console.log(`  Input:       ${usageRef.current.inputTokens}`);
+        console.log(`  Output:      ${usageRef.current.outputTokens}`);
+        console.log(`  Cache Read:  ${usageRef.current.cacheReadTokens}`);
+        console.log(`  Cache Write: ${usageRef.current.cacheWriteTokens}`);
+      }
+    };
+  }, []);
 
   const [sentInitial, setSentInitial] = React.useState(false);
   React.useEffect(() => {
@@ -91,6 +119,14 @@ export function ChatScreen({
         />
       )}
     </Box>
+  );
+}
+
+export function ChatScreen(props: ChatScreenProps): React.ReactElement {
+  return (
+    <TokenUsageProvider>
+      <ChatScreenInner {...props} />
+    </TokenUsageProvider>
   );
 }
 

@@ -68,6 +68,7 @@ export const SettingsSchema = z.object({
   setupCompleted: z.boolean().default(false),
   alwaysConfirm: z.boolean().default(false),
   showThinking: z.boolean().default(false),
+  showTokenSummary: z.boolean().default(false),
   maxOutputTokens: z.number().int().positive().default(16000),
   reasoningEffort: z.enum(["low", "med", "high"]).default("med"),
 });
@@ -107,6 +108,12 @@ export const SETTINGS_META: SettingMeta[] = [
     key: "showThinking",
     label: "Show Thinking",
     description: "Show AI thinking/summary for supported models",
+    type: "boolean",
+  },
+  {
+    key: "showTokenSummary",
+    label: "Show Token Summary",
+    description: "Display token usage summary on session exit",
     type: "boolean",
   },
   {
