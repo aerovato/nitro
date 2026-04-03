@@ -120,6 +120,7 @@ Run `nitro settings` to configure:
 
 - **alwaysConfirm**: Require confirmation for all commands
 - **showThinking**: Display AI reasoning for supported models
+- **showTokenSummary**: Display token usage summary on session exit
 - **maxOutputTokens**: Maximum output tokens per response
 - **reasoningEffort**: Reasoning effort level
 
