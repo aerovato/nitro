@@ -19,14 +19,15 @@ function AssistantMessage({
 }): React.ReactElement {
   const { settings } = useChatConfig();
   const content = message.content;
-  let parts: (ReasoningPart | TextPart)[] =
+  const rawParts =
     typeof content === "string"
-      ? [{ type: "text", text: content }]
-      : content.filter(
-          part => part.type === "text" || part.type === "reasoning",
-        );
+      ? [{ type: "text", text: content } as TextPart]
+      : [...content];
+  let displayedParts: (ReasoningPart | TextPart)[] = rawParts.filter(
+    part => part.type === "text" || part.type === "reasoning",
+  );
   if (!settings.showThinking) {
-    parts = parts.filter(part => part.type !== "reasoning");
+    displayedParts = displayedParts.filter(part => part.type !== "reasoning");
   }
   return (
     <Box
@@ -36,8 +37,8 @@ function AssistantMessage({
       paddingX={3}
       paddingY={1}
     >
-      {parts.length === 0 && <CustomText dimColor>Generating...</CustomText>}
-      {parts.map((part, i) => {
+      {rawParts.length === 0 && <CustomText dimColor>Generating...</CustomText>}
+      {displayedParts.map((part, i) => {
         if (part.type === "reasoning") {
           return <ReasoningPartBlock key={i} text={part.text} />;
         } else if (part.type === "text") {
