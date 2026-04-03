@@ -103,8 +103,9 @@ const ModelInputSchema = z.object({
     "A label describing how risky the command is.",
   ),
   behaviorTags: z
-    .array(BehaviorTagSchema)
-    .describe("A list of tags describing the command's behavior."),
+    .union([BehaviorTagSchema, z.array(BehaviorTagSchema)])
+    .transform(val => (Array.isArray(val) ? val : [val]))
+    .describe("A tag or list of tags describing the command's behavior."),
   timeout: z
     .int()
     .positive()
