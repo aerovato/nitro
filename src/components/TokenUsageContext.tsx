@@ -28,15 +28,14 @@ export function TokenUsageProvider({
   }));
 
   const addUsage = React.useCallback((stepUsage: LanguageModelUsage) => {
+    const cacheRead = stepUsage.inputTokenDetails?.cacheReadTokens ?? 0;
+    const cacheWrite = stepUsage.inputTokenDetails?.cacheWriteTokens ?? 0;
+    const inputTokens = (stepUsage.inputTokens ?? 0) - cacheRead;
     setUsage(prev => ({
-      inputTokens: prev.inputTokens + (stepUsage.inputTokens ?? 0),
+      inputTokens: prev.inputTokens + inputTokens,
       outputTokens: prev.outputTokens + (stepUsage.outputTokens ?? 0),
-      cacheReadTokens:
-        prev.cacheReadTokens
-        + (stepUsage.inputTokenDetails?.cacheReadTokens ?? 0),
-      cacheWriteTokens:
-        prev.cacheWriteTokens
-        + (stepUsage.inputTokenDetails?.cacheWriteTokens ?? 0),
+      cacheReadTokens: prev.cacheReadTokens + cacheRead,
+      cacheWriteTokens: prev.cacheWriteTokens + cacheWrite,
     }));
   }, []);
 
