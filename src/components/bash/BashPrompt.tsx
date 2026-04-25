@@ -74,25 +74,27 @@ export function BashPrompt({
   const [focusedIndex, setFocusedIndex] = React.useState(0);
   const [editing, setEditing] = React.useState(false);
   const [inputValue, setInputValue] = React.useState("");
-  const [autoApproved, setAutoApproved] = React.useState(false);
+  const [executing, setExecuting] = React.useState(false);
 
   // Auto-approve "Read Only" commands when not in strict mode
   React.useEffect(() => {
-    if (autoApproved) return;
+    if (executing) return;
 
     const shouldAutoApprove =
       riskLevel === "Read Only" && !chatConfig?.settings.alwaysConfirm;
 
     if (shouldAutoApprove) {
-      setAutoApproved(true);
+      setExecuting(true);
       void bashTool.execute(modelInput, { approved: true }).then(output => {
         onSubmit(output);
       });
     }
-  }, [riskLevel, chatConfig, modelInput, onSubmit, autoApproved]);
+  }, [riskLevel, chatConfig, modelInput, onSubmit, executing]);
 
   // eslint-disable-next-line @typescript-eslint/no-misused-promises
   useInput(async (_input, key) => {
+    if (executing) return;
+
     if (editing) {
       if (key.escape) {
         setEditing(false);
@@ -100,6 +102,7 @@ export function BashPrompt({
       if (key.return) {
         const trimmed = inputValue.trim();
         setEditing(false);
+        setExecuting(true);
         const output = await bashTool.execute(modelInput, {
           approved: false,
           rejectionMessage: trimmed.length > 0 ? trimmed : undefined,
@@ -117,6 +120,7 @@ export function BashPrompt({
     if (key.return) {
       const action = ACTIONS[focusedIndex]!;
       if (action.value === "approve") {
+        setExecuting(true);
         const output = await bashTool.execute(modelInput, { approved: true });
         onSubmit(output);
       } else if (action.value === "reject") {
@@ -127,11 +131,10 @@ export function BashPrompt({
     }
   });
 
-  // If auto-approved, show a simple executing message
-  if (autoApproved) {
+  if (executing) {
     return (
       <Box flexDirection="column" paddingX={3} paddingY={1}>
-        <CustomText color={GREEN}>Executing: {command}</CustomText>
+        <CustomText color={GREEN}>Running: {command}</CustomText>
       </Box>
     );
   }
