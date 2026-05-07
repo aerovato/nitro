@@ -1,20 +1,6 @@
 import { describe, it, expect, beforeEach } from "vitest";
-import { Writable } from "node:stream";
 import { Transcript } from "../../src/headless/transcript";
-
-// Lightweight Writable that captures all chunks for assertion.
-// Each test file currently has its own copy; deduplication is tracked
-// as a future improvement (amendment 13).
-class CaptureStream extends Writable {
-  chunks: string[] = [];
-  override _write(chunk: Buffer | string, _enc: string, cb: () => void) {
-    this.chunks.push(chunk.toString());
-    cb();
-  }
-  text(): string {
-    return this.chunks.join("");
-  }
-}
+import { CaptureStream } from "./helpers";
 
 let out: CaptureStream;
 let err: CaptureStream;

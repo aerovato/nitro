@@ -1,16 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { Writable } from "node:stream";
-
-class CaptureStream extends Writable {
-  chunks: string[] = [];
-  override _write(c: Buffer | string, _e: string, cb: () => void) {
-    this.chunks.push(c.toString());
-    cb();
-  }
-  text(): string {
-    return this.chunks.join("");
-  }
-}
+import { CaptureStream } from "./helpers";
 
 vi.mock("../../src/logic/settings", async () => {
   const actual: object = await vi.importActual("../../src/logic/settings");
@@ -38,7 +27,8 @@ describe("preflight", () => {
   it("returns ok=true when EULA accepted and provider configured", () => {
     mockedIsEulaAgreed.mockReturnValue(true);
     mockedGetProvider.mockReturnValue({ name: "openai" } as never);
-    const out = new CaptureStream(), err = new CaptureStream();
+    const out = new CaptureStream(),
+      err = new CaptureStream();
     const result = preflight({ stdout: out, stderr: err });
     expect(result.ok).toBe(true);
     expect(err.text()).toBe("");
@@ -47,7 +37,8 @@ describe("preflight", () => {
   it("returns ok=false + writes EULA message + exitCode 1 when EULA not agreed", () => {
     mockedIsEulaAgreed.mockReturnValue(false);
     mockedGetProvider.mockReturnValue({ name: "openai" } as never);
-    const out = new CaptureStream(), err = new CaptureStream();
+    const out = new CaptureStream(),
+      err = new CaptureStream();
     const result = preflight({ stdout: out, stderr: err });
     expect(result.ok).toBe(false);
     if (!result.ok) expect(result.exitCode).toBe(1);
@@ -58,7 +49,8 @@ describe("preflight", () => {
   it("returns ok=false + writes provider hint + exitCode 1 when no default provider", () => {
     mockedIsEulaAgreed.mockReturnValue(true);
     mockedGetProvider.mockReturnValue(null);
-    const out = new CaptureStream(), err = new CaptureStream();
+    const out = new CaptureStream(),
+      err = new CaptureStream();
     const result = preflight({ stdout: out, stderr: err });
     expect(result.ok).toBe(false);
     if (!result.ok) expect(result.exitCode).toBe(1);
@@ -69,7 +61,8 @@ describe("preflight", () => {
   it("checks EULA before provider (EULA error wins if both fail)", () => {
     mockedIsEulaAgreed.mockReturnValue(false);
     mockedGetProvider.mockReturnValue(null);
-    const out = new CaptureStream(), err = new CaptureStream();
+    const out = new CaptureStream(),
+      err = new CaptureStream();
     preflight({ stdout: out, stderr: err });
     expect(err.text()).toContain("EULA not yet accepted");
     expect(err.text()).not.toContain("provider add");

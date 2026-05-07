@@ -56,8 +56,17 @@ function printUsage(): void {
 // Known subcommands that should never be treated as one-shot requests,
 // even with --headless. Amendment 2: prevents --headless interactive misrouting.
 const KNOWN_SUBCOMMANDS = new Set([
-  "settings", "provider", "interactive", "i", "continue", "c",
-  "resume", "r", "strict", "s", "help",
+  "settings",
+  "provider",
+  "interactive",
+  "i",
+  "continue",
+  "c",
+  "resume",
+  "r",
+  "strict",
+  "s",
+  "help",
 ]);
 
 // Decide whether the (post-strip) argv constitutes a one-shot request.
@@ -88,15 +97,18 @@ async function main(args: string[]): Promise<void> {
   // Headless one-shot path
   const oneShotRequest = pickOneShotRequest(flags, remaining);
   if (
-    oneShotRequest !== null &&
-    isHeadlessContext({ flags, stdinIsTTY: process.stdin.isTTY ?? false })
+    oneShotRequest !== null
+    && isHeadlessContext({ flags, stdinIsTTY: process.stdin.isTTY ?? false })
   ) {
     const code = await runHeadless({
       request: oneShotRequest,
       yes: flags.yes,
       streams: { stdout: process.stdout, stderr: process.stderr },
     });
-    if (code !== 0) process.exit(code);
+    // Amendment 9: Use process.exitCode instead of process.exit() so
+    // stdout/stderr buffers have a chance to drain before the process exits.
+    // process.exit() kills immediately, which can truncate buffered writes.
+    if (code !== 0) process.exitCode = code;
     return;
   }
 

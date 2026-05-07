@@ -1,16 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { Writable } from "node:stream";
-
-class CaptureStream extends Writable {
-  chunks: string[] = [];
-  override _write(c: Buffer | string, _e: string, cb: () => void) {
-    this.chunks.push(c.toString());
-    cb();
-  }
-  text(): string {
-    return this.chunks.join("");
-  }
-}
+import { CaptureStream } from "./helpers";
 
 vi.mock("../../src/logic/settings", () => ({
   loadSettings: () => ({ maxOutputTokens: 1000, reasoningEffort: "med" }),
@@ -29,7 +18,7 @@ vi.mock("../../src/tools/bash", async () => {
   return {
     ...actual,
     bashTool: {
-      ...((actual as { bashTool: object }).bashTool),
+      ...(actual as { bashTool: object }).bashTool,
       execute: vi.fn(),
     },
   };
@@ -40,6 +29,9 @@ import { bashTool } from "../../src/tools/bash";
 import { runHeadless } from "../../src/headless/runHeadless";
 
 const mockedGenerate = vi.mocked(generateCompletion);
+/* eslint-disable-next-line @typescript-eslint/unbound-method -- vi.mocked with
+   shallow=true is needed to spy on bashTool.execute without losing the mock
+   setup in vi.mock(). The method is never called with a wrong `this`. */
 const mockedExecute = vi.mocked(bashTool.execute, true);
 
 /**
@@ -53,9 +45,7 @@ function fakeResult(opts: {
   toolCalls?: { toolCallId: string; toolName: string; args: string }[];
   text?: string;
 }) {
-  const messages = [
-    { role: "assistant" as const, content: opts.text ?? "" },
-  ];
+  const messages = [{ role: "assistant" as const, content: opts.text ?? "" }];
   return {
     fullStream: (async function* () {
       /* no-op drain */
@@ -263,9 +253,7 @@ describe("runHeadless", () => {
 
     expect(code).toBe(0);
     expect(mockedExecute).toHaveBeenCalledTimes(2);
-    expect(
-      out.text(),
-    ).toMatch(/\$ ls[\s\S]*\$ pwd[\s\S]*Answer: Both done\./);
+    expect(out.text()).toMatch(/\$ ls[\s\S]*\$ pwd[\s\S]*Answer: Both done\./);
   });
 
   it("returns 1 with stderr message when generateCompletion throws", async () => {
@@ -283,5 +271,47 @@ describe("runHeadless", () => {
 
     expect(code).toBe(1);
     expect(err.text()).toContain("rate limit");
+  });
+
+  // Amendment 6: max-turn guard
+  it("stops at max turns and returns 1 when model keeps requesting tool calls", async () => {
+    // Always return a tool call -- the model never converges to an answer
+    mockedGenerate.mockReturnValue(
+      fakeResult({
+        toolCalls: [
+          {
+            toolCallId: "loop",
+            toolName: "Bash",
+            args: JSON.stringify({
+              command: "echo loop",
+              explanation: "loop",
+              riskLevel: "Read Only",
+              behaviorTags: ["Safe"],
+              timeout: 30000,
+            }),
+          },
+        ],
+      }),
+    );
+    mockedExecute.mockResolvedValue({
+      command: "echo loop",
+      approved: true,
+      commandOutput: "out:\tloop",
+      exitCode: 0,
+    });
+
+    const out = new CaptureStream(),
+      err = new CaptureStream();
+    const code = await runHeadless({
+      request: "keep going",
+      yes: false,
+      streams: { stdout: out, stderr: err },
+    });
+
+    expect(code).toBe(1);
+    expect(err.text()).toContain("Max turns");
+    expect(err.text()).toContain("NITRO_MAX_TURNS");
+    // Default max is 20, so generateCompletion should be called exactly 20 times
+    expect(mockedGenerate).toHaveBeenCalledTimes(20);
   });
 });

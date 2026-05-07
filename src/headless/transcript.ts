@@ -1,6 +1,9 @@
 /**
  * Transcript -- output routing for headless (non-interactive) mode.
  *
+ * NOTE: Headless mode uses stdin only for TTY detection (process.stdin.isTTY).
+ * Stdin content is NOT passed to the model in v1.
+ *
  * Every public method writes to exactly one of two injected streams:
  *   stdout  -> the user-visible transcript (commands, answers, command output)
  *   stderr  -> metadata channel (risks, refusals, errors, stray tool lines)
@@ -21,18 +24,16 @@
 import type { Writable } from "node:stream";
 
 import type { RiskLevel, BehaviorTag } from "../tools/bash";
+import {
+  BASH_OUTPUT_STDOUT_PREFIX,
+  BASH_OUTPUT_STDERR_PREFIX,
+} from "../tools/bash";
 
 /** The two output sinks every Transcript writes to. */
 export interface TranscriptStreams {
   stdout: Writable;
   stderr: Writable;
 }
-
-// NOTE: These prefixes match the string literals in BashTool.executeBashCommand
-// (src/tools/bash.tsx lines 227, 234). They are NOT yet exported as named
-// constants from bash.tsx; when they are, import them here to avoid drift.
-const STDOUT_PREFIX = "out:\t";
-const STDERR_PREFIX = "err:\t";
 
 export class Transcript {
   constructor(private readonly streams: TranscriptStreams) {}
@@ -58,10 +59,14 @@ export class Transcript {
   writeBashOutput(toolOutput: string): void {
     for (const rawLine of toolOutput.split("\n")) {
       if (rawLine.length === 0) continue;
-      if (rawLine.startsWith(STDOUT_PREFIX)) {
-        this.streams.stdout.write(rawLine.slice(STDOUT_PREFIX.length) + "\n");
-      } else if (rawLine.startsWith(STDERR_PREFIX)) {
-        this.streams.stderr.write(rawLine.slice(STDERR_PREFIX.length) + "\n");
+      if (rawLine.startsWith(BASH_OUTPUT_STDOUT_PREFIX)) {
+        this.streams.stdout.write(
+          rawLine.slice(BASH_OUTPUT_STDOUT_PREFIX.length) + "\n",
+        );
+      } else if (rawLine.startsWith(BASH_OUTPUT_STDERR_PREFIX)) {
+        this.streams.stderr.write(
+          rawLine.slice(BASH_OUTPUT_STDERR_PREFIX.length) + "\n",
+        );
       } else {
         // Unprefixed lines go to stderr (amendment 8)
         this.streams.stderr.write(rawLine + "\n");

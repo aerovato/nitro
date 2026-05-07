@@ -17,14 +17,18 @@
  */
 
 import type { Writable } from "node:stream";
-import type { ModelMessage, ToolSet } from "ai";
+import type { ModelMessage, ToolSet, JSONValue } from "ai";
 import { tool as makeAiSdkTool } from "ai";
 
 import { loadSettings, isEulaAgreed, getSystemPrompt } from "../logic/settings";
 import { generateCompletion, getDefaultChatProvider } from "../logic/llm";
 import type { ProviderInfoWithName } from "../logic/provider";
 import type { Settings } from "../logic/settings";
-import { bashTool, type BashModelInput, type BashToolOutput } from "../tools/bash";
+import {
+  bashTool,
+  type BashModelInput,
+  type BashToolOutput,
+} from "../tools/bash";
 import { decide } from "./riskGate";
 import { Transcript } from "./transcript";
 
@@ -47,12 +51,12 @@ export type PreflightResult =
 // ---------------------------------------------------------------------------
 
 const EULA_NOT_ACCEPTED_MESSAGE =
-  "EULA not yet accepted. Run 'nitro' interactively once to review and " +
-  "accept it, then re-run your headless request.";
+  "EULA not yet accepted. Run 'nitro' interactively once to review and "
+  + "accept it, then re-run your headless request.";
 
 const NO_PROVIDER_MESSAGE =
-  "Default provider not configured. Run 'nitro provider add' interactively " +
-  "to configure one, then re-run your headless request.";
+  "Default provider not configured. Run 'nitro provider add' interactively "
+  + "to configure one, then re-run your headless request.";
 
 /**
  * Validate that the runtime environment is ready for headless execution.
@@ -80,6 +84,45 @@ export function preflight(streams: PreflightStreams): PreflightResult {
   }
 
   return { ok: true, settings, provider };
+}
+
+// ---------------------------------------------------------------------------
+// Headless system prompt
+// ---------------------------------------------------------------------------
+
+/**
+ * Derive a headless-specific system prompt from the base prompt.
+ *
+ * WHY: The base system prompt (settings.ts) targets interactive (single-turn)
+ * mode and contains directives like "complete within a single turn" and
+ * "use the AskUser tool". Neither applies in headless mode: the loop is
+ * inherently multi-turn and there is no human to ask questions.
+ *
+ * Amendments covered:
+ *   C1  -- remove single-turn directive, replace with multi-turn guidance
+ *   C1  -- strip AskUser tool references (headless has no human)
+ */
+export function getHeadlessSystemPrompt(): string {
+  let prompt = getSystemPrompt();
+
+  // Replace single-turn directive with multi-turn guidance
+  prompt = prompt.replace(
+    "within **a single turn**",
+    "across as many turns as needed, using the Bash tool iteratively",
+  );
+
+  // Remove the entire AskUser tool section from the prompt.
+  // This is cleaner than line-by-line removal because it handles
+  // indentation differences between the built-in and custom prompts.
+  prompt = prompt.replace(/\n## AskUser\n[\s\S]*?(?=\n## Bash)/, "");
+
+  // Remove remaining lines that reference AskUser (these appear in the
+  // Workflow and Guidelines sections, not under ## AskUser).
+  // Match lines containing "use the AskUser tool" regardless of leading
+  // whitespace, and remove the full line (including trailing newline).
+  prompt = prompt.replace(/^\s*- .*use the AskUser tool.*\n?/gm, "");
+
+  return prompt;
 }
 
 // ---------------------------------------------------------------------------
@@ -141,11 +184,14 @@ function extractAssistantText(messages: readonly ModelMessage[]): string {
  *
  * EXIT CODES:
  *   0  -- model produced a final answer (with or without tool calls)
- *   1  -- preflight failure or runtime error (e.g., API error)
+ *   1  -- preflight failure or runtime error (e.g., API error), or max turns exceeded
  *   2  -- risk gate refused a Dangerous/Extremely Dangerous tool call
  *
  * The loop drains fullStream on every turn (amendment 11) to prevent memory
  * leaks from unconsumed async generators.
+ *
+ * Amendment 6: A max-turn guard (default 20, override via NITRO_MAX_TURNS)
+ * prevents runaway loops when the model keeps requesting tool calls.
  */
 export async function runHeadless(args: RunHeadlessArgs): Promise<number> {
   const t = new Transcript(args.streams);
@@ -153,15 +199,33 @@ export async function runHeadless(args: RunHeadlessArgs): Promise<number> {
   if (!pre.ok) return pre.exitCode;
 
   const { settings, provider } = pre;
-  const systemPrompt = getSystemPrompt();
+  const systemPrompt = getHeadlessSystemPrompt();
   const tools = buildBashOnlyToolSet();
 
-  const messages: ModelMessage[] = [
-    { role: "user", content: args.request },
-  ];
+  // Amendment 6: Max-turn guard. Prevents runaway loops when the model keeps
+  // requesting tool calls without converging to an answer. Override via
+  // NITRO_MAX_TURNS env var (parsed as positive int).
+  const DEFAULT_MAX_TURNS = 20;
+  const maxTurns = (() => {
+    const env = process.env.NITRO_MAX_TURNS;
+    if (env === undefined) return DEFAULT_MAX_TURNS;
+    const parsed = parseInt(env, 10);
+    if (isNaN(parsed) || parsed <= 0) return DEFAULT_MAX_TURNS;
+    return parsed;
+  })();
+  let turns = 0;
+
+  const messages: ModelMessage[] = [{ role: "user", content: args.request }];
 
   try {
     while (true) {
+      turns++;
+      if (turns > maxTurns) {
+        t.writeError(
+          `Max turns (${maxTurns}) exceeded. The model is looping without producing a final answer. Set NITRO_MAX_TURNS to increase the limit.`,
+        );
+        return 1;
+      }
       const result = generateCompletion(
         provider,
         messages,
@@ -215,7 +279,7 @@ export async function runHeadless(args: RunHeadlessArgs): Promise<number> {
         // Parse the tool call input. The AI SDK's StaticToolCall carries
         // `input` (already-parsed object), but test mocks use `args` (JSON
         // string). Handle both for correctness and testability.
-        const rawInput =
+        const rawInput: unknown =
           "input" in call
             ? (call as { input: unknown }).input
             : typeof (call as { args: unknown }).args === "string"
@@ -243,9 +307,9 @@ export async function runHeadless(args: RunHeadlessArgs): Promise<number> {
         // Amendment 12: Audit-log auto-approved Dangerous+ commands so
         // operators can review what --yes allowed after the fact.
         if (
-          args.yes &&
-          (input.riskLevel === "Dangerous" ||
-            input.riskLevel === "Extremely Dangerous")
+          args.yes
+          && (input.riskLevel === "Dangerous"
+            || input.riskLevel === "Extremely Dangerous")
         ) {
           args.streams.stderr.write(
             `[--yes active: auto-approved ${input.riskLevel} command: ${input.command}]\n`,
@@ -270,7 +334,11 @@ export async function runHeadless(args: RunHeadlessArgs): Promise<number> {
               toolName: call.toolName,
               output: {
                 type: "json",
-                value: output as unknown as Record<string, unknown>,
+                // SAFETY: BashTool.execute() returns a plain JSON-serializable
+                // object. The double cast is needed because our output type
+                // (BashToolOutput) has fields like `command: string` that don't
+                // satisfy JSONValue's strict union. At runtime this is always safe.
+                value: output as unknown as JSONValue,
               },
             },
           ],
