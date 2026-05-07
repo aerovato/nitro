@@ -8,6 +8,19 @@ import { NitroTool } from "./tool";
 import { expandTabs } from "../utils";
 
 /**
+ * Prefixes used to tag stdout vs stderr lines in the tool output returned
+ * to the model. The model (and Transcript.writeBashOutput) use these to
+ * distinguish command output streams.
+ *
+ * WHY exported constants? transcript.ts needs to strip these same prefixes
+ * when routing output to the correct user-facing streams. Hard-coding the
+ * string literals in both places would silently drift if one changed.
+ * (Amendment 10)
+ */
+export const BASH_OUTPUT_STDOUT_PREFIX = "out:\t";
+export const BASH_OUTPUT_STDERR_PREFIX = "err:\t";
+
+/**
  * SAFETY: Execution is disabled by default to prevent accidental command
  * execution during tests. enableExecution() is only called in src/index.ts
  * when the CLI is invoked directly (require.main === module).
@@ -224,14 +237,14 @@ export class BashTool extends NitroTool<
       proc.stdout.on("data", (data: Buffer) => {
         const text = data.toString();
         for (const line of text.split("\n")) {
-          lines.push(`out:\t${line}`);
+          lines.push(`${BASH_OUTPUT_STDOUT_PREFIX}${line}`);
         }
       });
 
       proc.stderr.on("data", (data: Buffer) => {
         const text = data.toString();
         for (const line of text.split("\n")) {
-          lines.push(`err:\t${line}`);
+          lines.push(`${BASH_OUTPUT_STDERR_PREFIX}${line}`);
         }
       });
 

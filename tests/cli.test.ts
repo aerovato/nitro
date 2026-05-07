@@ -31,6 +31,11 @@ vi.mock("../src/logic/conversation", () => ({
 vi.mock("../src/logic/settings", () => ({
   loadSettings: () => ({ agreedToEula: 1 }),
   isEulaAgreed: () => true,
+  getSystemPrompt: () => "system prompt",
+}));
+
+vi.mock("../src/headless/runHeadless", () => ({
+  runHeadless: vi.fn().mockResolvedValue(0),
 }));
 
 vi.mock("../src/utils", () => ({
@@ -114,6 +119,8 @@ describe("CLI routing", () => {
 
   describe("request (default)", () => {
     it("runs chat screen non-interactive for multi-word request", async () => {
+      // Branch 3 auto-detect: with TTY stdin, the default route is ChatScreen.
+      Object.defineProperty(process.stdin, "isTTY", { value: true, configurable: true });
       await main(["hello world"]);
       expect(mockRunChatScreen).toHaveBeenCalledWith({
         initialRequest: "hello world",
