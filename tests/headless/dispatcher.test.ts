@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
 // ---------------------------------------------------------------------------
 // WHY mock at module level rather than with vi.mock inside describe?
@@ -63,7 +63,9 @@ describe("dispatcher: --headless flag routing", () => {
     );
   });
 
-  it("'find files' (no flag) still goes to runChatScreen", async () => {
+  it("'find files' (no flag) still goes to runChatScreen when stdin is a TTY", async () => {
+    // Branch 3 auto-detect: with a TTY stdin, the default route is ChatScreen.
+    Object.defineProperty(process.stdin, "isTTY", { value: true, configurable: true });
     await main(["find files"]);
     expect(mockedChatScreen).toHaveBeenCalledTimes(1);
     expect(mockedHeadless).not.toHaveBeenCalled();
@@ -78,6 +80,40 @@ describe("dispatcher: --headless flag routing", () => {
   it("--headless 'interactive' is treated as subcommand, not request", async () => {
     // Amendment 2: the KNOWN_SUBCOMMANDS whitelist prevents misrouting
     await main(["--headless", "interactive"]);
+    expect(mockedHeadless).not.toHaveBeenCalled();
+  });
+});
+
+describe("dispatcher: auto-detect routing", () => {
+  let originalIsTTY: boolean | undefined;
+
+  beforeEach(() => {
+    originalIsTTY = process.stdin.isTTY;
+  });
+  afterEach(() => {
+    Object.defineProperty(process.stdin, "isTTY", {
+      value: originalIsTTY, configurable: true,
+    });
+  });
+
+  it("'find files' on non-TTY stdin -> runHeadless", async () => {
+    Object.defineProperty(process.stdin, "isTTY", { value: false, configurable: true });
+    await main(["find files"]);
+    expect(mockedHeadless).toHaveBeenCalledTimes(1);
+    expect(mockedChatScreen).not.toHaveBeenCalled();
+  });
+
+  it("'find files' on TTY stdin -> runChatScreen (existing behavior)", async () => {
+    Object.defineProperty(process.stdin, "isTTY", { value: true, configurable: true });
+    await main(["find files"]);
+    expect(mockedChatScreen).toHaveBeenCalledTimes(1);
+    expect(mockedHeadless).not.toHaveBeenCalled();
+  });
+
+  it("--tty 'find files' on non-TTY stdin -> runChatScreen (override)", async () => {
+    Object.defineProperty(process.stdin, "isTTY", { value: false, configurable: true });
+    await main(["--tty", "find files"]);
+    expect(mockedChatScreen).toHaveBeenCalledTimes(1);
     expect(mockedHeadless).not.toHaveBeenCalled();
   });
 });

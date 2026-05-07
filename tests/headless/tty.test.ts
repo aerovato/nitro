@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { isHeadlessContext } from "../../src/headless/tty";
 
-describe("isHeadlessContext (v1: --headless flag only)", () => {
+describe("isHeadlessContext", () => {
   it("returns true when --headless is set", () => {
     expect(
       isHeadlessContext({
@@ -11,16 +11,34 @@ describe("isHeadlessContext (v1: --headless flag only)", () => {
     ).toBe(true);
   });
 
-  it("returns false when no flags set even with stdinIsTTY=false (autodetect arrives in branch 3)", () => {
+  it("returns true when stdin is not a TTY (no flags)", () => {
     expect(
       isHeadlessContext({
         flags: { headless: false, tty: false, yes: false },
         stdinIsTTY: false,
       }),
+    ).toBe(true);
+  });
+
+  it("returns false when stdin is a TTY (no flags)", () => {
+    expect(
+      isHeadlessContext({
+        flags: { headless: false, tty: false, yes: false },
+        stdinIsTTY: true,
+      }),
     ).toBe(false);
   });
 
-  it("returns false when --tty overrides --headless", () => {
+  it("--tty forces TUI even when stdin is not a TTY (escape hatch)", () => {
+    expect(
+      isHeadlessContext({
+        flags: { headless: false, tty: true, yes: false },
+        stdinIsTTY: false,
+      }),
+    ).toBe(false);
+  });
+
+  it("--tty wins over --headless if both are set", () => {
     expect(
       isHeadlessContext({
         flags: { headless: true, tty: true, yes: false },
