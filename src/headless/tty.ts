@@ -5,14 +5,20 @@ export interface HeadlessContextInput {
   stdinIsTTY: boolean;
 }
 
-// WHY take stdinIsTTY as a parameter rather than reading process.stdin.isTTY
-// directly: trivial testability, plus it forces the dispatcher (the only
-// real caller) to take responsibility for reading it once at the boundary.
+// V2 contract:
+//   --tty                 → never headless (highest precedence: explicit override)
+//   --headless            → always headless
+//   neither flag          → headless iff stdin is not a TTY (auto-detect)
 //
-// V1 (this commit): only --headless triggers headless. stdinIsTTY is accepted
-// but deliberately ignored — branch 3 (feat/headless-autodetect) extends this
-// to also trigger when !stdinIsTTY, with --tty as the explicit override.
-export function isHeadlessContext({ flags }: HeadlessContextInput): boolean {
+// The --tty escape hatch matters for two cases:
+//   (a) Testing the Ink failure path on purpose.
+//   (b) A TTY situation where someone is piping stdin to the process for
+//       reasons unrelated to nitro (rare but not impossible).
+export function isHeadlessContext({
+  flags,
+  stdinIsTTY,
+}: HeadlessContextInput): boolean {
   if (flags.tty) return false;
-  return flags.headless;
+  if (flags.headless) return true;
+  return !stdinIsTTY;
 }
