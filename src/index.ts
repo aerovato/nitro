@@ -11,6 +11,11 @@ import { runEulaScreen } from "./screens/EulaScreen";
 import { outputError } from "./utils";
 import { getLastConversationFilename } from "./logic/conversation";
 import { loadSettings, isEulaAgreed } from "./logic/settings";
+import {
+  startUpdateCheck,
+  getUpdateResult,
+  formatUpdateMessage,
+} from "./logic/updateCheck";
 import { dangerouslyEnableExecutionDoNotInvokeOrYourSystemWillGetNuked } from "./tools/bash";
 
 async function checkEula(): Promise<boolean> {
@@ -67,9 +72,10 @@ async function main(args: string[]): Promise<void> {
       return;
     case "interactive":
     case "i": {
+      void startUpdateCheck();
       const request = args[1] ?? "";
       await runChatScreen({ initialRequest: request, quitOnFinish: false });
-      return;
+      break;
     }
     case "continue":
     case "c": {
@@ -84,23 +90,25 @@ async function main(args: string[]): Promise<void> {
         outputError("Error: No conversation to continue.");
         process.exit(1);
       }
+      void startUpdateCheck();
       await runChatScreen({
         initialRequest: request,
         quitOnFinish: true,
         initialFilename: filename,
         hidePreviousMessages: true,
       });
-      return;
+      break;
     }
     case "strict":
     case "s": {
+      void startUpdateCheck();
       const request = args[1] ?? "";
       await runChatScreen({
         initialRequest: request,
         quitOnFinish: false,
         strictMode: true,
       });
-      return;
+      break;
     }
     case "resume":
     case "r": {
@@ -110,22 +118,29 @@ async function main(args: string[]): Promise<void> {
         outputError("Error: No conversation to resume.");
         process.exit(1);
       }
+      void startUpdateCheck();
       await runChatScreen({
         initialRequest: request,
         quitOnFinish: false,
         initialFilename: filename,
       });
-      return;
+      break;
     }
     default:
       if (command.includes(" ")) {
+        void startUpdateCheck();
         await runChatScreen({ initialRequest: command, quitOnFinish: true });
-        return;
+        break;
       }
+      outputError(`Unknown subcommand: ${command}`);
+      printUsage();
+      return;
   }
 
-  outputError(`Unknown subcommand: ${command}`);
-  printUsage();
+  const latestVersion = getUpdateResult();
+  if (latestVersion) {
+    console.warn(formatUpdateMessage(latestVersion));
+  }
 }
 
 if (require.main === module) {
