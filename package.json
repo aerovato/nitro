@@ -54,7 +54,8 @@
     "format": "prettier --write .",
     "test": "vitest run",
     "test:watch": "vitest",
-    "prepare": "husky"
+    "prepare": "husky",
+    "install-local": "npm run clean && npm run build && npm link"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^3.0.64",
