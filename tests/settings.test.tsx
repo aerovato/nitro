@@ -8,7 +8,7 @@ vi.mock("../src/logic/settings", () => ({
     showThinking: false,
     setupCompleted: false,
     maxOutputTokens: 32000,
-    reasoningEffort: "med",
+    reasoningEffort: "medium",
   }),
   saveSettings: vi.fn(),
   SETTINGS_META: [
