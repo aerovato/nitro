@@ -70,7 +70,12 @@ export const SettingsSchema = z.object({
   showThinking: z.boolean().default(false),
   showTokenSummary: z.boolean().default(false),
   maxOutputTokens: z.number().int().positive().default(16000),
-  reasoningEffort: z.enum(["low", "med", "high"]).default("med"),
+  reasoningEffort: z
+    .preprocess(
+      val => (val === "med" ? "medium" : val),
+      z.enum(["low", "medium", "high"]),
+    )
+    .default("medium"),
 });
 
 export type Settings = z.infer<typeof SettingsSchema>;
@@ -136,7 +141,7 @@ export const SETTINGS_META: SettingMeta[] = [
     type: "select",
     options: [
       { value: "low", label: "Low - Fast, concise reasoning" },
-      { value: "med", label: "Medium - Balanced (default)" },
+      { value: "medium", label: "Medium - Balanced (default)" },
       { value: "high", label: "High - Thorough reasoning" },
     ],
   },

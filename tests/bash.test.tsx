@@ -40,7 +40,7 @@ function renderBashPrompt(
       showThinking: false,
       showTokenSummary: false,
       maxOutputTokens: 16000,
-      reasoningEffort: "med",
+      reasoningEffort: "medium",
     },
     provider: {
       name: "test",

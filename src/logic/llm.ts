@@ -93,17 +93,9 @@ function getProviderOptions(
       return result;
     }
     case "anthropic": {
-      const effortMap: Record<
-        ReasoningEffort,
-        "low" | "high" | "medium" | "max"
-      > = {
-        low: "low",
-        med: "medium",
-        high: "high",
-      };
       const result: AnthropicProviderOptions = {
         thinking: { type: "adaptive" },
-        effort: effortMap[reasoningEffort],
+        effort: reasoningEffort,
       };
       return result;
     }

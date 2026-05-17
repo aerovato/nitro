@@ -5,6 +5,7 @@ import {
   saveSettings,
   DEFAULT_SETTINGS,
   SETTINGS_FILE,
+  SettingsSchema,
 } from "../src/logic/settings";
 import { APP_DATA_DIR, ensureAppDataDir } from "../src/logic/config";
 
@@ -112,5 +113,50 @@ describe("loadSettings", () => {
     const stats = fs.statSync(SETTINGS_FILE);
     const mode = stats.mode & 0o777;
     expect(mode).toBe(0o600);
+  });
+
+  it("migrates legacy reasoningEffort 'med' to 'medium'", () => {
+    const legacySettings = {
+      ...DEFAULT_SETTINGS,
+      reasoningEffort: "med",
+    };
+    fs.mkdirSync(APP_DATA_DIR, { recursive: true });
+    fs.writeFileSync(SETTINGS_FILE, JSON.stringify(legacySettings));
+
+    const settings = loadSettings();
+
+    expect(settings.reasoningEffort).toBe("medium");
+  });
+
+  it("preserves valid reasoningEffort values", () => {
+    for (const effort of ["low", "medium", "high"]) {
+      const validSettings = {
+        ...DEFAULT_SETTINGS,
+        reasoningEffort: effort,
+      };
+      fs.mkdirSync(APP_DATA_DIR, { recursive: true });
+      fs.writeFileSync(SETTINGS_FILE, JSON.stringify(validSettings));
+
+      const settings = loadSettings();
+
+      expect(settings.reasoningEffort).toBe(effort);
+    }
+  });
+});
+
+describe("SettingsSchema", () => {
+  it("upgrades 'med' to 'medium' via preprocess", () => {
+    const result = SettingsSchema.parse({ reasoningEffort: "med" });
+    expect(result.reasoningEffort).toBe("medium");
+  });
+
+  it("accepts 'medium' directly", () => {
+    const result = SettingsSchema.parse({ reasoningEffort: "medium" });
+    expect(result.reasoningEffort).toBe("medium");
+  });
+
+  it("defaults to 'medium'", () => {
+    const result = SettingsSchema.parse({});
+    expect(result.reasoningEffort).toBe("medium");
   });
 });
