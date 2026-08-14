@@ -92,17 +92,21 @@ function ChatScreenInner({
     ? messages.slice(initialMessageCount ?? 0)
     : messages;
 
+  let assistantFooter: React.ReactNode = null;
+  if (state.pending === "tool") {
+    assistantFooter = (
+      <ToolDisplay prompt={state.prompt} onSubmit={submitToolInput} />
+    );
+  } else if (state.pending === "executing") {
+    assistantFooter = <CustomText color={GREEN}>{state.label}</CustomText>;
+  }
+
   return (
     <Box flexDirection="column" backgroundColor={BG_PRIMARY}>
-      <MessageList messages={displayedMessages} />
-      {state.pending === "tool" && (
-        <ToolDisplay prompt={state.prompt} onSubmit={submitToolInput} />
-      )}
-      {state.pending === "executing" && (
-        <Box paddingX={3} paddingY={1}>
-          <CustomText color={GREEN}>{state.label}</CustomText>
-        </Box>
-      )}
+      <MessageList
+        messages={displayedMessages}
+        assistantFooter={assistantFooter}
+      />
       {state.pending === "user" && !quitOnFinish && (
         <ChatBox
           inputValue={inputValue}

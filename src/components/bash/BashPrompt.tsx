@@ -12,7 +12,6 @@ import type {
 import type { ToolPromptProps } from "../../tools/tool";
 import {
   BG_PRIMARY,
-  BG_SECONDARY,
   FG_PRIMARY,
   FG_SECONDARY,
   RED,
@@ -106,13 +105,7 @@ export function BashPrompt({
   });
 
   return (
-    <Box
-      flexDirection="column"
-      paddingX={3}
-      paddingY={1}
-      rowGap={1}
-      backgroundColor={BG_SECONDARY}
-    >
+    <Box flexDirection="column" rowGap={1}>
       <Box
         paddingX={3}
         paddingY={1}

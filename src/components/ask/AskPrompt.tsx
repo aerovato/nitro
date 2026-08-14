@@ -4,7 +4,7 @@ import { Box, useInput } from "ink";
 import { Question as QuestionComponent } from "./Question";
 import { CustomText } from "../custom";
 
-import { BG_PRIMARY, BG_SECONDARY, PURPLE } from "../../colors";
+import { BG_PRIMARY, PURPLE } from "../../colors";
 import type { AskUserModelInput, AskUserUserInput } from "../../tools";
 import type { ToolPromptProps } from "../../tools/tool";
 
@@ -69,13 +69,7 @@ export function AskPrompt({
   });
 
   return (
-    <Box
-      flexDirection="column"
-      paddingX={3}
-      paddingY={1}
-      rowGap={1}
-      backgroundColor={BG_SECONDARY}
-    >
+    <Box flexDirection="column" rowGap={1}>
       {questions.length > 1 && (
         <Box>
           <CustomText color={BG_PRIMARY} backgroundColor={PURPLE}>
@@ -89,18 +83,12 @@ export function AskPrompt({
           ))}
         </Box>
       )}
-      {questions.map((question, i) => {
-        const active = i === activeIndex;
-        return (
-          <QuestionComponent
-            active={active}
-            question={question}
-            response={responses[activeIndex]}
-            onAnswer={active ? handleAnswer : () => {}}
-            key={i}
-          />
-        );
-      })}
+      <QuestionComponent
+        active
+        question={question}
+        response={responses[activeIndex]}
+        onAnswer={handleAnswer}
+      />
       <Box flexDirection="row" columnGap={2}>
         {questions.length > 1 && (
           <Box flexDirection="row">

@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Box, Newline, useInput } from "ink";
+import { Box, useInput } from "ink";
 
 import { CustomText, CustomTextInput } from "../custom";
 
@@ -113,10 +113,7 @@ export function Question({
       <CustomText bold color={PURPLE}>
         {question.title}
       </CustomText>
-      <CustomText>
-        {question.question}
-        <Newline />
-      </CustomText>
+      <CustomText>{question.question}</CustomText>
       {choices.map((choice, i) => (
         <OptionRow
           key={i}

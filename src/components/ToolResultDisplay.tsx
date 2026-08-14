@@ -1,5 +1,6 @@
 import * as React from "react";
 import type { ToolResultOutput } from "@ai-sdk/provider-utils";
+import { Box } from "ink";
 
 import { CustomText } from "./custom";
 import { FG_SECONDARY, RED, YELLOW } from "../colors";
@@ -121,10 +122,13 @@ function BashResult({
     .map(line => line.substring(5))
     .join("\n");
   const tabFixedOutput = expandTabs(cleanedOutput);
+  if (tabFixedOutput.trim().length === 0) {
+    return header;
+  }
   return (
-    <>
+    <Box flexDirection="column" rowGap={1}>
       {header}
       <CustomText color={FG_SECONDARY}>{tabFixedOutput}</CustomText>
-    </>
+    </Box>
   );
 }
