@@ -47,6 +47,21 @@ export const DEFAULT_PROVIDERS: DefaultProvider[] = [
     baseURL: "https://api.groq.com/openai/v1",
     apiType: "openai-compatible",
   },
+  {
+    name: "ollama",
+    baseURL: "http://localhost:11434/v1",
+    apiType: "openai-compatible",
+  },
+  {
+    name: "lm-studio",
+    baseURL: "http://localhost:1234/v1",
+    apiType: "openai-compatible",
+  },
+  {
+    name: "llama-cpp",
+    baseURL: "http://localhost:8080/v1",
+    apiType: "openai-compatible",
+  },
 ];
 
 const FETCH_MODELS_TIMEOUT_MS = 2000;
