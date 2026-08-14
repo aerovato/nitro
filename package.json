@@ -52,6 +52,7 @@
     "dev": "bun run src/index.ts",
     "lint": "tsc --noEmit && eslint .",
     "format": "prettier --write .",
+    "release": "sh scripts/release.sh",
     "test": "vitest run",
     "test:watch": "vitest",
     "prepare": "husky",
