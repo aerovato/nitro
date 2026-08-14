@@ -1,9 +1,6 @@
 import { z } from "zod";
 
-import { CustomText } from "../components/custom/CustomText";
-import { YELLOW } from "../colors";
-import { NitroTool } from "./tool";
-import type { Settings } from "../logic/settings";
+import { defineTool } from "./tool";
 
 const ASK_TOOL_DESCRIPTION = `
 Ask the user one or more questions. Each question should come with predetermined choices for users to choose from. If no choices are adequate, users can choose to type their own answer.
@@ -76,6 +73,7 @@ const QuestionResponseSchema = z.object({
 const UserInputSchema = z.object({
   answers: z.array(QuestionResponseSchema),
 });
+
 const OutputSchema = z.object({
   answers: z.array(QuestionResponseSchema),
 });
@@ -87,37 +85,17 @@ export type AskUserModelInput = z.infer<typeof ModelInputSchema>;
 export type AskUserUserInput = z.infer<typeof UserInputSchema>;
 export type AskUserToolOutput = z.infer<typeof OutputSchema>;
 
-export class AskTool extends NitroTool<
-  typeof ModelInputSchema,
-  typeof UserInputSchema,
-  typeof OutputSchema
-> {
-  readonly name = "AskUser";
-  readonly description = ASK_TOOL_DESCRIPTION;
-  readonly modelInputSchema = ModelInputSchema;
-  readonly userInputSchema = UserInputSchema;
-  readonly outputSchema = OutputSchema;
-
-  async execute(
-    _modelInput: AskUserModelInput,
+export const askTool = defineTool({
+  name: "AskUser",
+  description: ASK_TOOL_DESCRIPTION,
+  modelInputSchema: ModelInputSchema,
+  userInputSchema: UserInputSchema,
+  outputSchema: OutputSchema,
+  execute(
+    modelInput: AskUserModelInput,
     userInput: AskUserUserInput,
   ): Promise<AskUserToolOutput> {
+    void modelInput;
     return Promise.resolve(userInput);
-  }
-
-  override formatSafeOutput(
-    _output: AskUserToolOutput,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    _settings: Settings,
-  ): React.ReactElement {
-    const numberQuestions = _output.answers.length;
-    return (
-      <CustomText color={YELLOW}>
-        {this.name}: Answered {numberQuestions} question
-        {numberQuestions !== 1 ? "s" : ""}
-      </CustomText>
-    );
-  }
-}
-
-export const askTool = new AskTool();
+  },
+});

@@ -11,7 +11,12 @@ import type {
 import { generateCompletion } from "./llm";
 import type { ProviderInfoWithName } from "./provider";
 import type { Settings } from "./settings";
-import { createToolSet, getToolInstance, NitroTool } from "../tools";
+import {
+  createToolSet,
+  getToolDefinition,
+  toolNotFoundError,
+  validationError,
+} from "../tools";
 
 export type NonSystemModelMessage = Exclude<ModelMessage, SystemModelMessage>;
 
@@ -49,25 +54,22 @@ async function* runToolCall(
   call: ToolCallPart,
   settings: Settings,
 ): AsyncGenerator<AgentEvent, ToolResultPart, unknown> {
-  const tool = getToolInstance(call.toolName);
-  if (!tool) {
-    const result = errorResult(
-      call,
-      NitroTool.toolNotFoundError(call.toolName),
-    );
+  const definition = getToolDefinition(call.toolName);
+  if (!definition) {
+    const result = errorResult(call, toolNotFoundError(call.toolName));
     yield { type: "tool-result", result };
     return result;
   }
 
-  const validated = tool.validateModelInput(call.input);
+  const validated = definition.modelInputSchema.safeParse(call.input);
   if (!validated.success) {
-    const result = errorResult(call, NitroTool.validationError(validated));
+    const result = errorResult(call, validationError(validated));
     yield { type: "tool-result", result };
     return result;
   }
   const modelInput = validated.data;
 
-  const autoInput = tool.autoApproveInput(modelInput, settings);
+  const autoInput = definition.autoApproveInput?.(modelInput, settings) ?? null;
   let userInput: unknown;
   if (autoInput !== null) {
     userInput = autoInput;
@@ -82,22 +84,20 @@ async function* runToolCall(
     };
   }
 
-  const validatedUserInput = tool.validateUserInput(userInput);
+  const validatedUserInput = definition.userInputSchema.safeParse(userInput);
   if (!validatedUserInput.success) {
-    const result = errorResult(
-      call,
-      NitroTool.validationError(validatedUserInput),
-    );
+    const result = errorResult(call, validationError(validatedUserInput));
     yield { type: "tool-result", result };
     return result;
   }
 
-  const label = tool.runningLabel(modelInput, validatedUserInput.data);
+  const label =
+    definition.runningLabel?.(modelInput, validatedUserInput.data) ?? null;
   if (label !== null) {
     yield { type: "tool-running", label };
   }
 
-  const output = await tool.execute(modelInput, validatedUserInput.data);
+  const output = await definition.execute(modelInput, validatedUserInput.data);
   const result: ToolResultPart = {
     type: "tool-result",
     toolCallId: call.toolCallId,

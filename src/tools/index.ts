@@ -1,37 +1,40 @@
-import type { ToolSet } from "ai";
+import { tool, type ToolSet } from "ai";
 import type { z } from "zod";
 
 import { askTool } from "./ask";
 import { bashTool } from "./bash";
-import { NitroTool } from "./tool";
+import type { ToolDefinition } from "./tool";
 
 export * from "./ask";
 export * from "./bash";
 export * from "./tool";
 
-type AnyNitroTool = NitroTool<
+export type AnyToolDefinition = ToolDefinition<
   z.ZodType<Record<string, unknown>>,
   z.ZodType<Record<string, unknown>>,
   z.ZodType<Record<string, unknown>>
 >;
 
-const ALL_TOOLS: Record<string, AnyNitroTool> = {
+const TOOL_DEFINITIONS: Record<string, AnyToolDefinition> = {
   [askTool.name]: askTool,
   [bashTool.name]: bashTool,
 };
 
-export function getToolInstance(toolName: string): AnyNitroTool | null {
-  const tool = ALL_TOOLS[toolName];
-  if (!tool) {
+export function getToolDefinition(toolName: string): AnyToolDefinition | null {
+  const definition = TOOL_DEFINITIONS[toolName];
+  if (!definition) {
     return null;
   }
-  return tool;
+  return definition;
 }
 
 export function createToolSet(): ToolSet {
   const toolSet: ToolSet = {};
-  Object.entries(ALL_TOOLS).forEach(([name, tool]) => {
-    toolSet[name] = tool.createTool();
+  Object.entries(TOOL_DEFINITIONS).forEach(([name, definition]) => {
+    toolSet[name] = tool({
+      description: definition.description,
+      inputSchema: definition.modelInputSchema,
+    });
   });
   return toolSet;
 }

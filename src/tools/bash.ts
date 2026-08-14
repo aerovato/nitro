@@ -2,11 +2,8 @@ import { spawn } from "node:child_process";
 
 import { z } from "zod";
 
-import { CustomText } from "../components/custom/CustomText";
-import { FG_SECONDARY, RED, YELLOW } from "../colors";
-import { NitroTool } from "./tool";
-import { expandTabs } from "../utils";
 import type { Settings } from "../logic/settings";
+import { defineTool } from "./tool";
 
 /**
  * SAFETY: Execution is disabled by default to prevent accidental command
@@ -155,18 +152,64 @@ export type BashModelInput = z.infer<typeof ModelInputSchema>;
 export type BashUserInput = z.infer<typeof UserInputSchema>;
 export type BashToolOutput = z.infer<typeof OutputSchema>;
 
-export class BashTool extends NitroTool<
-  typeof ModelInputSchema,
-  typeof UserInputSchema,
-  typeof OutputSchema
-> {
-  readonly name = "Bash";
-  readonly description = BASH_TOOL_DESCRIPTION;
-  readonly modelInputSchema = ModelInputSchema;
-  readonly userInputSchema = UserInputSchema;
-  readonly outputSchema = OutputSchema;
+async function executeBashCommand(options: {
+  command: string;
+  timeout: number;
+}): Promise<{ output: string; exitCode: number }> {
+  const { command, timeout } = options;
 
-  override autoApproveInput(
+  return new Promise(resolve => {
+    const lines: string[] = [];
+    let timedOut = false;
+
+    const proc = spawn("bash", ["-c", command], { cwd: process.cwd() });
+
+    const timer = setTimeout(() => {
+      timedOut = true;
+      proc.kill("SIGKILL");
+    }, timeout);
+
+    proc.stdout.on("data", (data: Buffer) => {
+      const text = data.toString();
+      for (const line of text.split("\n")) {
+        lines.push(`out:\t${line}`);
+      }
+    });
+
+    proc.stderr.on("data", (data: Buffer) => {
+      const text = data.toString();
+      for (const line of text.split("\n")) {
+        lines.push(`err:\t${line}`);
+      }
+    });
+
+    proc.on("close", code => {
+      clearTimeout(timer);
+      if (timedOut) {
+        lines.push("Tool Error: Command timed out");
+        resolve({ output: lines.join("\n"), exitCode: 124 });
+      } else {
+        resolve({ output: lines.join("\n"), exitCode: code ?? 0 });
+      }
+    });
+
+    proc.on("error", error => {
+      clearTimeout(timer);
+      lines.push(
+        `Tool Error: Encountered the following error while running command: "${error.message}"`,
+      );
+      resolve({ output: lines.join("\n"), exitCode: 1 });
+    });
+  });
+}
+
+export const bashTool = defineTool({
+  name: "Bash",
+  description: BASH_TOOL_DESCRIPTION,
+  modelInputSchema: ModelInputSchema,
+  userInputSchema: UserInputSchema,
+  outputSchema: OutputSchema,
+  autoApproveInput(
     modelInput: BashModelInput,
     settings: Settings,
   ): BashUserInput | null {
@@ -174,14 +217,14 @@ export class BashTool extends NitroTool<
       return { approved: true };
     }
     return null;
-  }
+  },
 
-  override runningLabel(
+  runningLabel(
     modelInput: BashModelInput,
     userInput: BashUserInput,
   ): string | null {
     return userInput.approved ? `Running: ${modelInput.command}` : null;
-  }
+  },
 
   async execute(
     modelInput: BashModelInput,
@@ -204,7 +247,7 @@ export class BashTool extends NitroTool<
       };
     }
     if (userInput.approved) {
-      const result = await this.executeBashCommand({
+      const result = await executeBashCommand({
         command: modelInput.command,
         timeout: modelInput.timeout,
       });
@@ -220,100 +263,5 @@ export class BashTool extends NitroTool<
       approved: false,
       rejectionMessage: userInput.rejectionMessage,
     };
-  }
-
-  private async executeBashCommand(options: {
-    command: string;
-    timeout: number;
-  }): Promise<{ output: string; exitCode: number }> {
-    const { command, timeout } = options;
-
-    return new Promise(resolve => {
-      const lines: string[] = [];
-      let timedOut = false;
-
-      const proc = spawn("bash", ["-c", command], { cwd: process.cwd() });
-
-      const timer = setTimeout(() => {
-        timedOut = true;
-        proc.kill("SIGKILL");
-      }, timeout);
-
-      proc.stdout.on("data", (data: Buffer) => {
-        const text = data.toString();
-        for (const line of text.split("\n")) {
-          lines.push(`out:\t${line}`);
-        }
-      });
-
-      proc.stderr.on("data", (data: Buffer) => {
-        const text = data.toString();
-        for (const line of text.split("\n")) {
-          lines.push(`err:\t${line}`);
-        }
-      });
-
-      proc.on("close", code => {
-        clearTimeout(timer);
-        if (timedOut) {
-          lines.push("Tool Error: Command timed out");
-          resolve({ output: lines.join("\n"), exitCode: 124 });
-        } else {
-          resolve({ output: lines.join("\n"), exitCode: code ?? 0 });
-        }
-      });
-
-      proc.on("error", error => {
-        clearTimeout(timer);
-        lines.push(
-          `Tool Error: Encountered the following error while running command: "${error.message}"`,
-        );
-        resolve({ output: lines.join("\n"), exitCode: 1 });
-      });
-    });
-  }
-
-  override formatSafeOutput(
-    output: BashToolOutput,
-    settings: Settings,
-  ): React.ReactElement {
-    if (output.approved) {
-      const header = (
-        <CustomText color={YELLOW}>
-          {this.name}: {output.command}
-        </CustomText>
-      );
-      if (!settings.showCommandOutput) {
-        return <>{header}</>;
-      }
-      let truncatedOutput: string[] = output.commandOutput.split("\n");
-      if (truncatedOutput.length > 16) {
-        truncatedOutput = [
-          ...truncatedOutput.slice(0, 8),
-          "out:\t...", // Have to add "out:" or else ellipsis get truncated
-          ...truncatedOutput.slice(-8),
-        ];
-      }
-      const cleanedOutput = truncatedOutput
-        .map(line => line.substring(5))
-        .join("\n");
-      const tabFixedOutput = expandTabs(cleanedOutput);
-      return (
-        <>
-          {header}
-          <CustomText color={FG_SECONDARY}>{tabFixedOutput}</CustomText>
-        </>
-      );
-    } else {
-      return (
-        <>
-          <CustomText color={RED}>
-            [Denied] {this.name}: {output.command}
-          </CustomText>
-        </>
-      );
-    }
-  }
-}
-
-export const bashTool = new BashTool();
+  },
+});
