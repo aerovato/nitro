@@ -6,6 +6,7 @@ import { CustomText } from "../components/custom/CustomText";
 import { FG_SECONDARY, RED, YELLOW } from "../colors";
 import { NitroTool } from "./tool";
 import { expandTabs } from "../utils";
+import type { Settings } from "../logic/settings";
 
 /**
  * SAFETY: Execution is disabled by default to prevent accidental command
@@ -255,8 +256,19 @@ export class BashTool extends NitroTool<
     });
   }
 
-  override formatSafeOutput(output: BashToolOutput): React.ReactElement {
+  override formatSafeOutput(
+    output: BashToolOutput,
+    settings: Settings,
+  ): React.ReactElement {
     if (output.approved) {
+      const header = (
+        <CustomText color={YELLOW}>
+          {this.name}: {output.command}
+        </CustomText>
+      );
+      if (!settings.showCommandOutput) {
+        return <>{header}</>;
+      }
       let truncatedOutput: string[] = output.commandOutput.split("\n");
       if (truncatedOutput.length > 16) {
         truncatedOutput = [
@@ -271,9 +283,7 @@ export class BashTool extends NitroTool<
       const tabFixedOutput = expandTabs(cleanedOutput);
       return (
         <>
-          <CustomText color={YELLOW}>
-            {this.name}: {output.command}
-          </CustomText>
+          {header}
           <CustomText color={FG_SECONDARY}>{tabFixedOutput}</CustomText>
         </>
       );

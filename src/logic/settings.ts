@@ -67,6 +67,7 @@ export const SettingsSchema = z.object({
   agreedToEula: z.number().nullable().default(null),
   setupCompleted: z.boolean().default(false),
   alwaysConfirm: z.boolean().default(false),
+  showCommandOutput: z.boolean().default(false),
   showThinking: z.boolean().default(false),
   showTokenSummary: z.boolean().default(false),
   maxOutputTokens: z.number().int().positive().default(16000),
@@ -107,6 +108,13 @@ export const SETTINGS_META: SettingMeta[] = [
     key: "alwaysConfirm",
     label: "Always Confirm",
     description: "Prompt for confirmation before all commands",
+    type: "boolean",
+  },
+  {
+    key: "showCommandOutput",
+    label: "Show Command Output",
+    description:
+      "Display command output in the chat (commands are always shown)",
     type: "boolean",
   },
   {

@@ -37,6 +37,7 @@ function renderBashPrompt(
       agreedToEula: EULA_VERSION,
       setupCompleted: true,
       alwaysConfirm: options.alwaysConfirm ?? false,
+      showCommandOutput: false,
       showThinking: false,
       showTokenSummary: false,
       maxOutputTokens: 16000,
