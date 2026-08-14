@@ -8,7 +8,7 @@ import {
 import { join } from "node:path";
 import { z } from "zod";
 import { APP_DATA_DIR, ensureAppDataDir } from "./config";
-import { NonSystemModelMessage } from "../hooks/useChatState";
+import type { NonSystemModelMessage } from "./agent";
 
 export const CHATS_DIR = join(APP_DATA_DIR, "chats");
 export const STATE_FILE = join(APP_DATA_DIR, "state.json");

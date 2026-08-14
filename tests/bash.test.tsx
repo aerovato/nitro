@@ -2,8 +2,8 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { existsSync, unlinkSync } from "node:fs";
 import { render } from "ink-testing-library";
 import { BashPrompt } from "../src/components/bash/BashPrompt";
-import { ChatConfigContext } from "../src/components/ChatConfigContext";
-import type { ChatConfig } from "../src/components/ChatConfigContext";
+import { bashTool, type BashModelInput } from "../src/tools/bash";
+import { DEFAULT_SETTINGS } from "../src/logic/settings";
 import {
   pressArrow,
   pressEnter,
@@ -11,8 +11,6 @@ import {
   waitForText,
   waitFor,
 } from "./utils";
-import type { BashModelInput } from "../src/tools/bash";
-import { EULA_VERSION } from "../src/eula";
 
 const mockExit = vi.fn();
 
@@ -23,42 +21,6 @@ vi.mock("ink", async () => {
     useApp: () => ({ exit: mockExit }),
   };
 });
-
-/**
- * Helper to render BashPrompt with a mock ChatConfigContext
- */
-function renderBashPrompt(
-  modelInput: BashModelInput,
-  onSubmit: (output: unknown) => void,
-  options: { alwaysConfirm?: boolean } = {},
-) {
-  const mockConfig: ChatConfig = {
-    settings: {
-      agreedToEula: EULA_VERSION,
-      setupCompleted: true,
-      alwaysConfirm: options.alwaysConfirm ?? false,
-      showCommandOutput: false,
-      showThinking: false,
-      showTokenSummary: false,
-      maxOutputTokens: 16000,
-      reasoningEffort: "medium",
-    },
-    provider: {
-      name: "test",
-      apiKey: "test",
-      baseURL: "http://test",
-      model: "test",
-      apiType: "openai-compatible",
-    },
-    systemPrompt: "test",
-  };
-
-  return render(
-    <ChatConfigContext.Provider value={mockConfig}>
-      <BashPrompt modelInput={modelInput} onSubmit={onSubmit} />
-    </ChatConfigContext.Provider>,
-  );
-}
 
 /**
  * SENTINEL FILE: If this file exists after tests run, execution was NOT
@@ -119,9 +81,9 @@ describe("BashPrompt", () => {
 
   it("renders command, explanation, risk level, and actions", () => {
     const onSubmit = vi.fn();
-    const { lastFrame } = renderBashPrompt(readOnlyInput, onSubmit, {
-      alwaysConfirm: true,
-    });
+    const { lastFrame } = render(
+      <BashPrompt modelInput={readOnlyInput} onSubmit={onSubmit} />,
+    );
     const output = lastFrame();
     expect(output).toContain(`touch ${SENTINEL_FILE}`);
     expect(output).toContain("Sentinel command for safety verification.");
@@ -143,29 +105,13 @@ describe("BashPrompt", () => {
 
   it("renders with no behavior tags", () => {
     const onSubmit = vi.fn();
-    const { lastFrame } = renderBashPrompt(readOnlyInput, onSubmit, {
-      alwaysConfirm: true,
-    });
+    const { lastFrame } = render(
+      <BashPrompt modelInput={readOnlyInput} onSubmit={onSubmit} />,
+    );
     const output = lastFrame();
     expect(output).toContain("Read Only");
     expect(output).not.toContain("Write");
     expect(output).not.toContain("Delete");
-  });
-
-  it("calls onSubmit with approved: true when Approve and Run is selected", async () => {
-    const onSubmit = vi.fn();
-    const { lastFrame, stdin } = renderBashPrompt(readOnlyInput, onSubmit, {
-      alwaysConfirm: true,
-    });
-    await waitForText(lastFrame, "Approve and Run");
-    pressEnter(stdin);
-    await waitFor(() => onSubmit.mock.calls.length > 0);
-    expect(onSubmit).toHaveBeenCalledWith({
-      command: `touch ${SENTINEL_FILE}`,
-      approved: true,
-      commandOutput: "[EXECUTION DISABLED] Command was not executed.",
-      exitCode: 0,
-    });
   });
 
   it("calls onSubmit with approved: true when Approve and Run is selected", async () => {
@@ -176,19 +122,14 @@ describe("BashPrompt", () => {
     await waitForText(lastFrame, "Approve and Run");
     pressEnter(stdin);
     await waitFor(() => onSubmit.mock.calls.length > 0);
-    expect(onSubmit).toHaveBeenCalledWith({
-      command: `touch ${SENTINEL_FILE}`,
-      approved: true,
-      commandOutput: "[EXECUTION DISABLED] Command was not executed.",
-      exitCode: 0,
-    });
+    expect(onSubmit).toHaveBeenCalledWith({ approved: true });
   });
 
   it("calls exit when Cancel and Exit is selected", async () => {
     const onSubmit = vi.fn();
-    const { lastFrame, stdin } = renderBashPrompt(readOnlyInput, onSubmit, {
-      alwaysConfirm: true,
-    });
+    const { lastFrame, stdin } = render(
+      <BashPrompt modelInput={readOnlyInput} onSubmit={onSubmit} />,
+    );
     await waitForText(lastFrame, "Approve and Run");
     pressArrow(stdin, "down");
     await delay(50);
@@ -198,34 +139,6 @@ describe("BashPrompt", () => {
     await waitFor(() => mockExit.mock.calls.length > 0);
     expect(mockExit).toHaveBeenCalledOnce();
     expect(onSubmit).not.toHaveBeenCalled();
-  });
-
-  it("auto-approves Read Only commands when not in strict mode", async () => {
-    const onSubmit = vi.fn();
-    renderBashPrompt(readOnlyInput, onSubmit, { alwaysConfirm: false });
-    await waitFor(() => onSubmit.mock.calls.length > 0);
-    expect(onSubmit).toHaveBeenCalledWith({
-      command: `touch ${SENTINEL_FILE}`,
-      approved: true,
-      commandOutput: "[EXECUTION DISABLED] Command was not executed.",
-      exitCode: 0,
-    });
-  });
-
-  it("shows approval prompt for Read Only commands in strict mode", async () => {
-    const onSubmit = vi.fn();
-    const { lastFrame, stdin } = renderBashPrompt(readOnlyInput, onSubmit, {
-      alwaysConfirm: true,
-    });
-    await waitForText(lastFrame, "Approve and Run");
-    pressEnter(stdin);
-    await waitFor(() => onSubmit.mock.calls.length > 0);
-    expect(onSubmit).toHaveBeenCalledWith({
-      command: `touch ${SENTINEL_FILE}`,
-      approved: true,
-      commandOutput: "[EXECUTION DISABLED] Command was not executed.",
-      exitCode: 0,
-    });
   });
 
   it("enters reject editing mode and submits rejection message", async () => {
@@ -243,7 +156,6 @@ describe("BashPrompt", () => {
     pressEnter(stdin);
     await waitFor(() => onSubmit.mock.calls.length > 0);
     expect(onSubmit).toHaveBeenCalledWith({
-      command: "echo 'removing temp file'",
       approved: false,
       rejectionMessage: "Too risky",
     });
@@ -262,7 +174,6 @@ describe("BashPrompt", () => {
     pressEnter(stdin);
     await waitFor(() => onSubmit.mock.calls.length > 0);
     expect(onSubmit).toHaveBeenCalledWith({
-      command: "echo 'removing temp file'",
       approved: false,
       rejectionMessage: undefined,
     });
@@ -284,12 +195,7 @@ describe("BashPrompt", () => {
     await delay(50);
     pressEnter(stdin);
     await waitFor(() => onSubmit.mock.calls.length > 0);
-    expect(onSubmit).toHaveBeenCalledWith({
-      command: "echo 'removing temp file'",
-      approved: true,
-      commandOutput: "[EXECUTION DISABLED] Command was not executed.",
-      exitCode: 0,
-    });
+    expect(onSubmit).toHaveBeenCalledWith({ approved: true });
   });
 
   it("wraps focus from last action to first on down arrow", async () => {
@@ -306,12 +212,7 @@ describe("BashPrompt", () => {
     await delay(50);
     pressEnter(stdin);
     await waitFor(() => onSubmit.mock.calls.length > 0);
-    expect(onSubmit).toHaveBeenCalledWith({
-      command: "echo 'system cleanup simulation'",
-      approved: true,
-      commandOutput: "[EXECUTION DISABLED] Command was not executed.",
-      exitCode: 0,
-    });
+    expect(onSubmit).toHaveBeenCalledWith({ approved: true });
   });
 
   it("wraps focus from first action to last on up arrow", async () => {
@@ -326,6 +227,32 @@ describe("BashPrompt", () => {
     await waitFor(() => mockExit.mock.calls.length > 0);
     expect(mockExit).toHaveBeenCalledOnce();
     expect(onSubmit).not.toHaveBeenCalled();
+  });
+});
+
+describe("BashTool auto-approval", () => {
+  it("auto-approves Read Only commands when not in strict mode", () => {
+    expect(bashTool.autoApproveInput(readOnlyInput, DEFAULT_SETTINGS)).toEqual({
+      approved: true,
+    });
+  });
+
+  it("does not auto-approve Read Only commands in strict mode", () => {
+    const strictSettings = { ...DEFAULT_SETTINGS, alwaysConfirm: true };
+    expect(bashTool.autoApproveInput(readOnlyInput, strictSettings)).toBeNull();
+  });
+
+  it("does not auto-approve non-read-only commands", () => {
+    expect(bashTool.autoApproveInput(normalInput, DEFAULT_SETTINGS)).toBeNull();
+    expect(
+      bashTool.autoApproveInput(dangerousInput, DEFAULT_SETTINGS),
+    ).toBeNull();
+  });
+
+  it("provides a running label with the command", () => {
+    expect(bashTool.runningLabel(normalInput, { approved: true })).toBe(
+      "Running: echo 'installing dependencies'",
+    );
   });
 });
 

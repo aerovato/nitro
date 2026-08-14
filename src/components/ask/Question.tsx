@@ -55,7 +55,7 @@ export interface QuestionProps {
   active: boolean;
   question: Question;
   response?: QuestionSelection;
-  onAnswer: (answer: string, index: number) => Promise<void>;
+  onAnswer: (answer: string, index: number) => void | Promise<void>;
 }
 
 export function Question({

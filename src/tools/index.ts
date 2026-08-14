@@ -1,48 +1,40 @@
-import type { ToolSet, ToolCallPart } from "ai";
+import { tool, type ToolSet } from "ai";
 import type { z } from "zod";
 
 import { askTool } from "./ask";
 import { bashTool } from "./bash";
-import { NitroTool } from "./tool";
+import type { ToolDefinition } from "./tool";
 
 export * from "./ask";
 export * from "./bash";
 export * from "./tool";
 
-const ALL_TOOLS = {
-  [askTool.name]: askTool,
-  [bashTool.name]: bashTool,
-} satisfies Record<
-  string,
-  NitroTool<
-    z.ZodType<Record<string, unknown>>,
-    z.ZodType<Record<string, unknown>>,
-    z.ZodType<Record<string, unknown>>
-  >
+export type AnyToolDefinition = ToolDefinition<
+  z.ZodType<Record<string, unknown>>,
+  z.ZodType<Record<string, unknown>>,
+  z.ZodType<Record<string, unknown>>
 >;
 
-type ALL_TOOL_NAMES = keyof typeof ALL_TOOLS;
+const TOOL_DEFINITIONS: Record<string, AnyToolDefinition> = {
+  [askTool.name]: askTool,
+  [bashTool.name]: bashTool,
+};
 
-export function getToolInstance(toolName: string) {
-  const tool = ALL_TOOLS[toolName as ALL_TOOL_NAMES];
-  if (!tool) {
+export function getToolDefinition(toolName: string): AnyToolDefinition | null {
+  const definition = TOOL_DEFINITIONS[toolName];
+  if (!definition) {
     return null;
   }
-  return tool;
-}
-
-export function validateToolCall(toolCall: ToolCallPart) {
-  const tool = ALL_TOOLS[toolCall.toolName as ALL_TOOL_NAMES];
-  if (!tool) {
-    return null;
-  }
-  return tool.validateModelInput(toolCall.input);
+  return definition;
 }
 
 export function createToolSet(): ToolSet {
   const toolSet: ToolSet = {};
-  Object.entries(ALL_TOOLS).forEach(([name, tool]) => {
-    toolSet[name] = tool.createTool();
+  Object.entries(TOOL_DEFINITIONS).forEach(([name, definition]) => {
+    toolSet[name] = tool({
+      description: definition.description,
+      inputSchema: definition.modelInputSchema,
+    });
   });
   return toolSet;
 }

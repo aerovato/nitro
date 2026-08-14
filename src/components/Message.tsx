@@ -8,8 +8,8 @@ import { AssistantModelMessage, ModelMessage, TextPart } from "ai";
 import { Box } from "ink";
 import React from "react";
 import { CustomText } from "./custom";
-import { BG_PRIMARY, BG_SECONDARY, FG_PRIMARY, RED } from "../colors";
-import { getToolInstance } from "../tools/index";
+import { ToolResultDisplay } from "./ToolResultDisplay";
+import { BG_PRIMARY, BG_SECONDARY, FG_PRIMARY } from "../colors";
 import { useChatConfig } from "./ChatConfigContext";
 
 function AssistantMessage({
@@ -106,22 +106,14 @@ function ToolMessage({
       backgroundColor={BG_PRIMARY}
       paddingX={3}
     >
-      {parts.map((part, i) => {
-        const toolName = part.toolName;
-        const tool = getToolInstance(toolName);
-        if (tool) {
-          return (
-            <React.Fragment key={i}>
-              {tool.formatOutput(part.output, settings)}
-            </React.Fragment>
-          );
-        }
-        return (
-          <CustomText key={i} color={RED}>
-            Error: Unknown tool called {toolName}
-          </CustomText>
-        );
-      })}
+      {parts.map((part, i) => (
+        <ToolResultDisplay
+          key={i}
+          toolName={part.toolName}
+          output={part.output}
+          settings={settings}
+        />
+      ))}
     </Box>
   );
 }
