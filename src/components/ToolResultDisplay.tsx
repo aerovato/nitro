@@ -81,7 +81,7 @@ function AskResult({
   const numberQuestions = output.answers.length;
   return (
     <Text color={YELLOW}>
-      AskUser: Answered {numberQuestions} question
+      Answered {numberQuestions} question
       {numberQuestions !== 1 ? "s" : ""}
     </Text>
   );
@@ -95,10 +95,10 @@ function BashResult({
   showCommandOutput: boolean;
 }): React.ReactElement {
   if (!output.approved) {
-    return <Text color={RED}>[Denied] Bash: {output.command}</Text>;
+    return <Text color={RED}>[Denied] $ {output.command}</Text>;
   }
 
-  const header = <Text color={YELLOW}>Bash: {output.command}</Text>;
+  const header = <Text color={YELLOW}>$ {output.command}</Text>;
   if (!showCommandOutput) {
     return header;
   }

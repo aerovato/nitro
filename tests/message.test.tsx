@@ -113,7 +113,7 @@ describe("message spacing", () => {
 
     expect(renderMessages(messages, false)).toEqual([
       "│  Checking",
-      "│  Bash: pwd",
+      "│  $ pwd",
       "│",
       "│  /root/project",
       "│  Finished",

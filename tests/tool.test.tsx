@@ -36,7 +36,7 @@ describe("Tool output formatting", () => {
       />,
     );
     const output = lastFrame() ?? "";
-    expect(output).toContain("Bash: pwd");
+    expect(output).toContain("$ pwd");
     expect(output).not.toContain("/root/project");
   });
 
