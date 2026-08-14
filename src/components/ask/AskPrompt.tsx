@@ -68,7 +68,17 @@ export function AskPrompt({
   });
 
   return (
-    <Box flexDirection="column" rowGap={1}>
+    <Box
+      flexDirection="column"
+      width="100%"
+      borderStyle="single"
+      borderTop={false}
+      borderRight={false}
+      borderBottom={false}
+      borderColor={PURPLE}
+      paddingLeft={2}
+      rowGap={1}
+    >
       {questions.length > 1 && (
         <Box>
           <Text color={PURPLE} bold>

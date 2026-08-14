@@ -30,17 +30,11 @@
 ```bash
 nitro "<request>"              # Execute request and exit
 
-nitro interactive [request]    # Start interactive session
-nitro i [request]              # (shorthand)
-
 nitro continue <request>       # Continue last conversation
 nitro c <request>              # (shorthand)
 
-nitro resume [request]         # Resume last conversation interactively
-nitro r [request]
-
-nitro strict [request]         # Run in strict mode (always confirm commands)
-nitro s [request]
+nitro strict <request>          # Run in strict mode (always confirm commands)
+nitro s <request>
 
 nitro provider add             # Add a new provider
 nitro provider list            # List all providers

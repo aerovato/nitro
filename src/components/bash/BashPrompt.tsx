@@ -94,10 +94,20 @@ export function BashPrompt({
   });
 
   return (
-    <Box flexDirection="column" rowGap={1}>
-      <Text bold>{command}</Text>
+    <Box
+      flexDirection="column"
+      width="100%"
+      borderStyle="single"
+      borderTop={false}
+      borderRight={false}
+      borderBottom={false}
+      borderColor={PURPLE}
+      paddingLeft={2}
+      rowGap={1}
+    >
+      <Text dimColor>{`# ${explanation}`}</Text>
 
-      <Text dimColor>{explanation}</Text>
+      <Text color={GREEN}>{`$ ${command}`}</Text>
 
       <Box flexDirection="row" columnGap={1}>
         <Text color={riskColor} bold>

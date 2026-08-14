@@ -59,6 +59,8 @@ describe("CLI routing", () => {
       expect(consoleSpy).toHaveBeenCalled();
       const output: unknown = consoleSpy.mock.calls[0]?.[0];
       expect(output).toContain("Usage: nitro");
+      expect(output).not.toContain("interactive");
+      expect(output).not.toContain("resume");
       consoleSpy.mockRestore();
     });
 
@@ -86,38 +88,11 @@ describe("CLI routing", () => {
     });
   });
 
-  describe("interactive", () => {
-    it("runs chat screen interactive without request", async () => {
-      await main(["interactive"]);
-      expect(mockRunChatScreen).toHaveBeenCalledWith({
-        initialRequest: "",
-        quitOnFinish: false,
-      });
-    });
-
-    it("runs chat screen interactive with request", async () => {
-      await main(["interactive", "hello world"]);
-      expect(mockRunChatScreen).toHaveBeenCalledWith({
-        initialRequest: "hello world",
-        quitOnFinish: false,
-      });
-    });
-
-    it("'i' alias works", async () => {
-      await main(["i", "test request"]);
-      expect(mockRunChatScreen).toHaveBeenCalledWith({
-        initialRequest: "test request",
-        quitOnFinish: false,
-      });
-    });
-  });
-
   describe("request (default)", () => {
     it("runs chat screen non-interactive for multi-word request", async () => {
       await main(["hello world"]);
       expect(mockRunChatScreen).toHaveBeenCalledWith({
         initialRequest: "hello world",
-        quitOnFinish: true,
       });
     });
   });
@@ -151,7 +126,6 @@ describe("CLI routing", () => {
       await main(["continue", "follow up"]);
       expect(mockRunChatScreen).toHaveBeenCalledWith({
         initialRequest: "follow up",
-        quitOnFinish: true,
         initialFilename: "123.json",
         hidePreviousMessages: true,
       });
@@ -162,55 +136,52 @@ describe("CLI routing", () => {
       await main(["c", "another request"]);
       expect(mockRunChatScreen).toHaveBeenCalledWith({
         initialRequest: "another request",
-        quitOnFinish: true,
         initialFilename: "456.json",
         hidePreviousMessages: true,
       });
     });
   });
 
-  describe("resume", () => {
-    it("errors without conversation", async () => {
-      mockGetLastConversationFilename.mockReturnValue(null);
-      try {
-        await main(["resume"]);
-      } catch (e) {
-        expect((e as Error).message).toBe("EXIT:1");
-      }
+  describe("strict", () => {
+    it("requires a request", async () => {
+      await expect(main(["strict"])).rejects.toThrow("EXIT:1");
       expect(mockOutputError).toHaveBeenCalledWith(
-        "Error: No conversation to resume.",
+        "Error: strict requires a request argument.",
       );
     });
 
-    it("runs chat screen interactive with filename", async () => {
-      mockGetLastConversationFilename.mockReturnValue("123.json");
-      await main(["resume"]);
+    it("runs one request with strict mode enabled", async () => {
+      await main(["strict", "check everything"]);
       expect(mockRunChatScreen).toHaveBeenCalledWith({
-        initialRequest: "",
-        quitOnFinish: false,
-        initialFilename: "123.json",
+        initialRequest: "check everything",
+        strictMode: true,
       });
     });
 
-    it("runs chat screen with filename and request", async () => {
-      mockGetLastConversationFilename.mockReturnValue("456.json");
-      await main(["resume", "continue from here"]);
+    it("supports the 's' alias", async () => {
+      await main(["s", "check everything"]);
       expect(mockRunChatScreen).toHaveBeenCalledWith({
-        initialRequest: "continue from here",
-        quitOnFinish: false,
-        initialFilename: "456.json",
+        initialRequest: "check everything",
+        strictMode: true,
       });
     });
+  });
 
-    it("'r' alias works", async () => {
-      mockGetLastConversationFilename.mockReturnValue("789.json");
-      await main(["r", "alias test"]);
-      expect(mockRunChatScreen).toHaveBeenCalledWith({
-        initialRequest: "alias test",
-        quitOnFinish: false,
-        initialFilename: "789.json",
-      });
-    });
+  describe("removed commands", () => {
+    it.each(["interactive", "i", "resume", "r"])(
+      "treats %s as unknown",
+      async command => {
+        const consoleSpy = vi
+          .spyOn(console, "log")
+          .mockImplementation(() => {});
+        await main([command]);
+        expect(mockOutputError).toHaveBeenCalledWith(
+          `Unknown subcommand: ${command}`,
+        );
+        expect(mockRunChatScreen).not.toHaveBeenCalled();
+        consoleSpy.mockRestore();
+      },
+    );
   });
 
   describe("unknown command", () => {

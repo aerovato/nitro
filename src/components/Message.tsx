@@ -2,13 +2,13 @@ import {
   ReasoningPart,
   ToolModelMessage,
   ToolResultPart,
-  UserModelMessage,
 } from "@ai-sdk/provider-utils";
 import { AssistantModelMessage, ModelMessage, TextPart } from "ai";
 import { Box, Text } from "ink";
 import React from "react";
 import { ToolResultDisplay } from "./ToolResultDisplay";
 import { useChatConfig } from "./ChatConfigContext";
+import { AQUA, YELLOW } from "../colors";
 
 type AssistantTurnMessage = AssistantModelMessage | ToolModelMessage;
 
@@ -19,7 +19,6 @@ interface AssistantTurnData {
 
 interface UserTurnData {
   role: "user";
-  message: UserModelMessage;
 }
 
 type TurnData = AssistantTurnData | UserTurnData;
@@ -53,7 +52,16 @@ function AssistantMessage({
   parts: (ReasoningPart | TextPart)[];
 }): React.ReactElement {
   return (
-    <Box flexDirection="column" rowGap={1}>
+    <Box
+      flexDirection="column"
+      width="100%"
+      borderStyle="single"
+      borderTop={false}
+      borderRight={false}
+      borderBottom={false}
+      borderColor={AQUA}
+      paddingLeft={2}
+    >
       {parts.map((part, i) => {
         if (part.type === "reasoning") {
           return <ReasoningPartBlock key={i} text={part.text} />;
@@ -72,39 +80,6 @@ function TextPartBlock({ text }: { text: string }): React.ReactElement {
   return <Text>{text.trim()}</Text>;
 }
 
-function UserMessage({
-  message,
-}: {
-  message: UserModelMessage;
-}): React.ReactElement {
-  const parts: TextPart[] = [];
-  const content = message.content;
-  if (typeof content === "string") {
-    parts.push({ type: "text", text: content });
-  } else {
-    parts.push(...content.filter(part => part.type === "text"));
-  }
-  return (
-    <Box flexDirection="column" width="100%" paddingY={1}>
-      <Box
-        flexDirection="column"
-        width="100%"
-        borderStyle="single"
-        borderTop={false}
-        borderRight={false}
-        borderBottom={false}
-        borderColor="gray"
-        paddingLeft={2}
-        rowGap={1}
-      >
-        {parts.map((part, i) => (
-          <Text key={i}>{part.text.trim()}</Text>
-        ))}
-      </Box>
-    </Box>
-  );
-}
-
 function ToolMessage({
   parts,
 }: {
@@ -112,7 +87,16 @@ function ToolMessage({
 }): React.ReactElement {
   const { settings } = useChatConfig();
   return (
-    <Box flexDirection="column" width="100%" rowGap={1}>
+    <Box
+      flexDirection="column"
+      width="100%"
+      borderStyle="single"
+      borderTop={false}
+      borderRight={false}
+      borderBottom={false}
+      borderColor={YELLOW}
+      paddingLeft={2}
+    >
       {parts.map((part, i) => (
         <ToolResultDisplay
           key={i}
@@ -149,13 +133,7 @@ function AssistantTurn({
   }
 
   return (
-    <Box
-      flexDirection="column"
-      width="100%"
-      rowGap={1}
-      paddingX={3}
-      paddingY={1}
-    >
+    <Box flexDirection="column" width="100%">
       {content}
       {footer}
     </Box>
@@ -166,7 +144,7 @@ function groupMessages(messages: ModelMessage[]): TurnData[] {
   const turns: TurnData[] = [];
   for (const message of messages) {
     if (message.role === "user") {
-      turns.push({ role: "user", message });
+      turns.push({ role: "user" });
       continue;
     }
     if (message.role !== "assistant" && message.role !== "tool") {
@@ -200,9 +178,7 @@ export function MessageList({
   return (
     <Box flexDirection="column">
       {turns.map((turn, index) =>
-        turn.role === "user" ? (
-          <UserMessage key={index} message={turn.message} />
-        ) : (
+        turn.role === "user" ? null : (
           <AssistantTurn
             key={index}
             messages={turn.messages}

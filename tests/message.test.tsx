@@ -86,7 +86,7 @@ function bashResult(toolCallId: string): ToolModelMessage {
 }
 
 describe("message spacing", () => {
-  it("pads turns once and separates assistant parts by one row", () => {
+  it("hides user turns and borders assistant parts", () => {
     const assistant: AssistantModelMessage = {
       role: "assistant",
       content: [
@@ -97,7 +97,7 @@ describe("message spacing", () => {
 
     expect(
       renderMessages([{ role: "user", content: "Request" }, assistant], true),
-    ).toEqual(["", "│  Request", "", "", "   Thinking", "", "   Answer", ""]);
+    ).toEqual(["│  Thinking", "│  Answer"]);
   });
 
   it("keeps tool activity inside one assistant turn", () => {
@@ -112,18 +112,11 @@ describe("message spacing", () => {
     ];
 
     expect(renderMessages(messages, false)).toEqual([
-      "",
-      "│  Request",
-      "",
-      "",
-      "   Checking",
-      "",
-      "   Bash: pwd",
-      "",
-      "   /root/project",
-      "",
-      "   Finished",
-      "",
+      "│  Checking",
+      "│  Bash: pwd",
+      "│",
+      "│  /root/project",
+      "│  Finished",
     ]);
   });
 
@@ -139,6 +132,6 @@ describe("message spacing", () => {
 
     expect(
       renderMessages(messages, false, <Text>Running Bash...</Text>),
-    ).toEqual(["", "│  Request", "", "", "   Running Bash...", ""]);
+    ).toEqual(["Running Bash..."]);
   });
 });
