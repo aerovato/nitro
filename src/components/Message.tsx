@@ -93,6 +93,7 @@ function ToolMessage({
 }: {
   message: ToolModelMessage;
 }): React.ReactElement {
+  const { settings } = useChatConfig();
   const parts: ToolResultPart[] = [];
   const content = message.content;
   parts.push(
@@ -111,7 +112,7 @@ function ToolMessage({
         if (tool) {
           return (
             <React.Fragment key={i}>
-              {tool.formatOutput(part.output)}
+              {tool.formatOutput(part.output, settings)}
             </React.Fragment>
           );
         }

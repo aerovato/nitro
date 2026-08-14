@@ -3,6 +3,7 @@ import { z } from "zod";
 import { CustomText } from "../components/custom/CustomText";
 import { YELLOW } from "../colors";
 import { NitroTool } from "./tool";
+import type { Settings } from "../logic/settings";
 
 const ASK_TOOL_DESCRIPTION = `
 Ask the user one or more questions. Each question should come with predetermined choices for users to choose from. If no choices are adequate, users can choose to type their own answer.
@@ -104,8 +105,12 @@ export class AskTool extends NitroTool<
     return Promise.resolve(userInput);
   }
 
-  override formatSafeOutput(output: AskUserToolOutput): React.ReactElement {
-    const numberQuestions = output.answers.length;
+  override formatSafeOutput(
+    _output: AskUserToolOutput,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    _settings: Settings,
+  ): React.ReactElement {
+    const numberQuestions = _output.answers.length;
     return (
       <CustomText color={YELLOW}>
         {this.name}: Answered {numberQuestions} question

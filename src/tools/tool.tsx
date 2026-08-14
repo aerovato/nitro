@@ -5,6 +5,7 @@ import type { ToolResultOutput } from "@ai-sdk/provider-utils";
 
 import { CustomText } from "../components/custom/CustomText";
 import { RED } from "../colors";
+import type { Settings } from "../logic/settings";
 
 export type ToolPromptProps<TModelInput, TOutput> = {
   modelInput: TModelInput;
@@ -52,10 +53,16 @@ export abstract class NitroTool<
     return `Unknown tool "${toolName}". Available tools: AskUser, Bash`;
   }
 
-  abstract formatSafeOutput(output: z.infer<TOutput>): React.ReactElement;
+  abstract formatSafeOutput(
+    output: z.infer<TOutput>,
+    settings: Settings,
+  ): React.ReactElement;
 
   // Note: only "json", "error-text", and "error-json" tool outputs are currently supported.
-  formatOutput(output: ToolResultOutput): React.ReactElement {
+  formatOutput(
+    output: ToolResultOutput,
+    settings: Settings,
+  ): React.ReactElement {
     if (output.type === "json") {
       const validated = this.outputSchema.safeParse(output.value);
       if (!validated.success) {
@@ -65,7 +72,7 @@ export abstract class NitroTool<
           </CustomText>
         );
       } else {
-        return this.formatSafeOutput(validated.data);
+        return this.formatSafeOutput(validated.data, settings);
       }
     }
     if (output.type === "error-text") {
