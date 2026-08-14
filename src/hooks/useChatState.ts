@@ -8,6 +8,7 @@ import type {
 import type { ProviderInfoWithName } from "../logic/provider";
 import type { Settings } from "../logic/settings";
 import { transformInput } from "../logic/llm";
+import { prependWorkspaceContext } from "../logic/environment";
 import { saveConversation, loadConversation } from "../logic/conversation";
 import { exitWithError } from "../utils";
 import {
@@ -193,7 +194,7 @@ export function useChatState({
     if (!transformed || pendingRef.current !== "user") return false;
     messagesRef.current = [
       ...messagesRef.current,
-      { role: "user", content: transformed },
+      { role: "user", content: prependWorkspaceContext(transformed) },
     ];
     void runTurn();
     return true;

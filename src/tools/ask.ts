@@ -4,13 +4,14 @@ import { defineTool } from "./tool";
 
 const ASK_TOOL_DESCRIPTION = `
 Ask the user one or more questions. Each question should come with predetermined choices for users to choose from. If no choices are adequate, users can choose to type their own answer.
-Use this tool to clarify ambiguous requests or gather user decisions.
 
 Tool Usage Guidelines:
-- Use the tool only if:
-  - The user's intention is unclear and cannot be determined with 80% accuracy; or
-  - The user's request is dangerous and may result in unintended consequences.
-- Do not use the tool if the user's intention is clear and the request is reasonably safe or reversible.
+- Default: do not ask. Act with sensible defaults.
+- Ask only if:
+  - Intent is unclear (<80% confidence) and a wrong guess is costly; or
+  - Action is destructive/hard to reverse and the target set is ambiguous.
+- Never ask to confirm tool choice, flags, or formats the user already implied
+  (e.g. "convert demo.mov to mp4" → run ffmpeg; no format/codec questions unless required).
 - **Do not manually add a "Type your own answer" option. This option is automatically provided by the UI.**
 
 Example Usage:
