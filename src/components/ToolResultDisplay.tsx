@@ -1,9 +1,8 @@
 import * as React from "react";
 import type { ToolResultOutput } from "@ai-sdk/provider-utils";
-import { Box } from "ink";
+import { Box, Text } from "ink";
 
-import { CustomText } from "./custom";
-import { FG_SECONDARY, RED, YELLOW } from "../colors";
+import { RED, YELLOW } from "../colors";
 import type { Settings } from "../logic/settings";
 import type { AskUserToolOutput, BashToolOutput } from "../tools";
 import { getToolDefinition } from "../tools";
@@ -22,16 +21,14 @@ export function ToolResultDisplay({
 }: ToolResultDisplayProps): React.ReactElement {
   const definition = getToolDefinition(toolName);
   if (definition === null) {
-    return (
-      <CustomText color={RED}>Error: Unknown tool called {toolName}</CustomText>
-    );
+    return <Text color={RED}>Error: Unknown tool called {toolName}</Text>;
   }
 
   if (output.type === "error-text") {
     return (
-      <CustomText color={RED}>
+      <Text color={RED}>
         Error: {toolName} tool call failed: {output.value}
-      </CustomText>
+      </Text>
     );
   }
 
@@ -41,26 +38,24 @@ export function ToolResultDisplay({
         ? output.value.trim()
         : "Tool call failed validation.";
     return (
-      <CustomText color={RED}>
+      <Text color={RED}>
         Error: {toolName} tool call failed: {summary}
-      </CustomText>
+      </Text>
     );
   }
 
   if (output.type !== "json") {
     return (
-      <CustomText color={RED}>
+      <Text color={RED}>
         Error: Unsupported tool output type "{output.type}".
-      </CustomText>
+      </Text>
     );
   }
 
   const validated = definition.outputSchema.safeParse(output.value);
   if (!validated.success) {
     return (
-      <CustomText color={RED}>
-        Error: {toolName} returned unrecognized output.
-      </CustomText>
+      <Text color={RED}>Error: {toolName} returned unrecognized output.</Text>
     );
   }
 
@@ -75,9 +70,7 @@ export function ToolResultDisplay({
       />
     );
   }
-  return (
-    <CustomText color={RED}>Error: No renderer for tool {toolName}</CustomText>
-  );
+  return <Text color={RED}>Error: No renderer for tool {toolName}</Text>;
 }
 
 function AskResult({
@@ -87,10 +80,10 @@ function AskResult({
 }): React.ReactElement {
   const numberQuestions = output.answers.length;
   return (
-    <CustomText color={YELLOW}>
+    <Text color={YELLOW}>
       AskUser: Answered {numberQuestions} question
       {numberQuestions !== 1 ? "s" : ""}
-    </CustomText>
+    </Text>
   );
 }
 
@@ -102,10 +95,10 @@ function BashResult({
   showCommandOutput: boolean;
 }): React.ReactElement {
   if (!output.approved) {
-    return <CustomText color={RED}>[Denied] Bash: {output.command}</CustomText>;
+    return <Text color={RED}>[Denied] Bash: {output.command}</Text>;
   }
 
-  const header = <CustomText color={YELLOW}>Bash: {output.command}</CustomText>;
+  const header = <Text color={YELLOW}>Bash: {output.command}</Text>;
   if (!showCommandOutput) {
     return header;
   }
@@ -128,7 +121,7 @@ function BashResult({
   return (
     <Box flexDirection="column" rowGap={1}>
       {header}
-      <CustomText color={FG_SECONDARY}>{tabFixedOutput}</CustomText>
+      <Text dimColor>{tabFixedOutput}</Text>
     </Box>
   );
 }

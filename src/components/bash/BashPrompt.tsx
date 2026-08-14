@@ -1,7 +1,7 @@
 import * as React from "react";
-import { Box, useApp, useInput } from "ink";
+import { Box, Text, useApp, useInput } from "ink";
 
-import { CustomText, CustomTextInput } from "../custom";
+import { CustomTextInput } from "../custom";
 
 import type {
   BashModelInput,
@@ -10,23 +10,12 @@ import type {
   BehaviorTag,
 } from "../../tools/bash";
 import type { ToolPromptProps } from "../../tools/tool";
-import {
-  BG_PRIMARY,
-  FG_PRIMARY,
-  FG_SECONDARY,
-  RED,
-  ORANGE,
-  BLUE,
-  GREEN,
-  YELLOW,
-  AQUA,
-  PURPLE,
-} from "../../colors";
+import { RED, BLUE, GREEN, YELLOW, AQUA, PURPLE } from "../../colors";
 
 const RISK_COLORS: Record<RiskLevel, string> = {
   "Read Only": GREEN,
-  Normal: YELLOW,
-  Dangerous: ORANGE,
+  Normal: AQUA,
+  Dangerous: YELLOW,
   "Extremely Dangerous": RED,
 };
 
@@ -35,7 +24,7 @@ const BEHAVIOR_TAG_COLORS: Record<BehaviorTag, string> = {
   Reversible: AQUA,
   Write: YELLOW,
   Delete: RED,
-  Overwrite: ORANGE,
+  Overwrite: YELLOW,
   "Side Effects": PURPLE,
   Exfiltration: RED,
 };
@@ -106,21 +95,14 @@ export function BashPrompt({
 
   return (
     <Box flexDirection="column" rowGap={1}>
-      <Box
-        paddingX={3}
-        paddingY={1}
-        backgroundColor={BG_PRIMARY}
-        flexDirection="column"
-      >
-        <CustomText>{command}</CustomText>
-      </Box>
+      <Text bold>{command}</Text>
 
-      <CustomText color={FG_SECONDARY}>{explanation}</CustomText>
+      <Text dimColor>{explanation}</Text>
 
       <Box flexDirection="row" columnGap={1}>
-        <CustomText color={BG_PRIMARY} backgroundColor={riskColor}>
-          {` ${riskLevel} `}
-        </CustomText>
+        <Text color={riskColor} bold>
+          {`[${riskLevel}]`}
+        </Text>
         <BehaviorTags behaviorTags={behaviorTags} />
       </Box>
 
@@ -129,16 +111,13 @@ export function BashPrompt({
           const focused = focusedIndex === i;
           return (
             <Box key={action.value} flexDirection="row">
-              <CustomText
-                dimColor={!focused}
-                color={focused ? BLUE : FG_PRIMARY}
-              >
+              <Text dimColor={!focused} color={focused ? BLUE : undefined}>
                 {i + 1}.{" "}
-              </CustomText>
+              </Text>
               <Box flexDirection="column">
-                <CustomText bold={focused} color={focused ? BLUE : FG_PRIMARY}>
+                <Text bold={focused} color={focused ? BLUE : undefined}>
                   {action.label}
-                </CustomText>
+                </Text>
                 {editing && action.value === "reject" && (
                   <CustomTextInput
                     value={inputValue}
@@ -156,12 +135,12 @@ export function BashPrompt({
 
       <Box flexDirection="row" columnGap={2}>
         <Box flexDirection="row">
-          <CustomText>↑↓</CustomText>
-          <CustomText dimColor>{" select"}</CustomText>
+          <Text>↑↓</Text>
+          <Text dimColor>{" select"}</Text>
         </Box>
         <Box flexDirection="row">
-          <CustomText>↵</CustomText>
-          <CustomText dimColor>{" submit"}</CustomText>
+          <Text>↵</Text>
+          <Text dimColor>{" submit"}</Text>
         </Box>
       </Box>
     </Box>
@@ -177,13 +156,9 @@ function BehaviorTags({
     <>
       {behaviorTags.length > 0
         && behaviorTags.map(tag => (
-          <CustomText
-            key={tag}
-            color={BEHAVIOR_TAG_COLORS[tag]}
-            backgroundColor={BG_PRIMARY}
-          >
-            {` ${tag} `}
-          </CustomText>
+          <Text key={tag} color={BEHAVIOR_TAG_COLORS[tag]}>
+            {`[${tag}]`}
+          </Text>
         ))}
     </>
   );

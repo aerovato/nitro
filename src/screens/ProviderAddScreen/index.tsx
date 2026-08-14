@@ -1,6 +1,6 @@
 import * as React from "react";
-import { Box, useApp } from "ink";
-import { CustomSelect, CustomText, CustomTextInput } from "../../components";
+import { Box, Text, useApp } from "ink";
+import { CustomSelect, CustomTextInput } from "../../components";
 import { renderWithColor } from "../../utils";
 import { RED, GREEN, YELLOW } from "../../colors";
 import { useProviderAddState } from "../../hooks/useProviderAddState";
@@ -23,32 +23,32 @@ function FormSummary({
     <>
       {isPastStep(step, "name") && (
         <Box>
-          <CustomText dimColor>Provider Name: </CustomText>
-          <CustomText>{form.name}</CustomText>
+          <Text dimColor>Provider Name: </Text>
+          <Text>{form.name}</Text>
         </Box>
       )}
       {isPastStep(step, "baseURL") && (
         <Box>
-          <CustomText dimColor>Base URL: </CustomText>
-          <CustomText>{form.baseURL}</CustomText>
+          <Text dimColor>Base URL: </Text>
+          <Text>{form.baseURL}</Text>
         </Box>
       )}
       {isPastStep(step, "apiType") && (
         <Box>
-          <CustomText dimColor>API Type: </CustomText>
-          <CustomText>{form.apiType}</CustomText>
+          <Text dimColor>API Type: </Text>
+          <Text>{form.apiType}</Text>
         </Box>
       )}
       {isPastStep(step, "apiKey") && (
         <Box>
-          <CustomText dimColor>API Key: </CustomText>
-          <CustomText>{form.apiKey || "(none)"}</CustomText>
+          <Text dimColor>API Key: </Text>
+          <Text>{form.apiKey || "(none)"}</Text>
         </Box>
       )}
       {isPastStep(step, "model") && (
         <Box>
-          <CustomText dimColor>Model: </CustomText>
-          <CustomText>{form.model}</CustomText>
+          <Text dimColor>Model: </Text>
+          <Text>{form.model}</Text>
         </Box>
       )}
     </>
@@ -70,9 +70,9 @@ function TextStep({
 }): React.ReactElement {
   return (
     <Box flexDirection="column">
-      {error && <CustomText color={RED}>{error}</CustomText>}
+      {error && <Text color={RED}>{error}</Text>}
       <Box>
-        <CustomText dimColor>{label}: </CustomText>
+        <Text dimColor>{label}: </Text>
         <CustomTextInput
           value={textInput}
           onChange={setTextInput}
@@ -98,7 +98,7 @@ function SelectStep({
 }): React.ReactElement {
   return (
     <Box flexDirection="column">
-      <CustomText dimColor>{label}</CustomText>
+      <Text dimColor>{label}</Text>
       <CustomSelect
         options={options}
         focusedIndex={focusedIndex}
@@ -132,12 +132,12 @@ function ModelStep({
 }): React.ReactElement {
   return (
     <Box flexDirection="column">
-      {error && <CustomText color={RED}>{error}</CustomText>}
+      {error && <Text color={RED}>{error}</Text>}
       {modelsLoading ? (
-        <CustomText color={YELLOW}>Fetching models...</CustomText>
+        <Text color={YELLOW}>Fetching models...</Text>
       ) : models.length > 0 ? (
         <>
-          <CustomText dimColor>Select a model:</CustomText>
+          <Text dimColor>Select a model:</Text>
           <CustomSelect
             options={[
               ...models.map(m => ({ value: m, label: m })),
@@ -150,7 +150,7 @@ function ModelStep({
         </>
       ) : (
         <Box>
-          <CustomText dimColor>Model: </CustomText>
+          <Text dimColor>Model: </Text>
           <CustomTextInput
             value={textInput}
             onChange={setTextInput}
@@ -173,9 +173,7 @@ export function ProviderAddScreen(): React.ReactElement {
   }, [state.step, exit]);
 
   if (state.step === "done") {
-    return (
-      <CustomText color={GREEN}>Provider "{state.form.name}" added</CustomText>
-    );
+    return <Text color={GREEN}>Provider "{state.form.name}" added</Text>;
   }
 
   return (

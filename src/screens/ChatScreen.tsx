@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Box, useApp } from "ink";
+import { Box, Text, useApp } from "ink";
 
 import { runProviderDefaultScreen } from "./ProviderDefaultScreen";
 import {
@@ -13,8 +13,7 @@ import {
 import { getDefaultProvider } from "../logic/provider";
 import { useChatState } from "../hooks/useChatState";
 import { renderWithColor } from "../utils";
-import { BG_PRIMARY, GREEN } from "../colors";
-import { CustomText } from "../components/custom";
+import { GREEN } from "../colors";
 import {
   ChatConfigProvider,
   useChatConfig,
@@ -98,11 +97,11 @@ function ChatScreenInner({
       <ToolDisplay prompt={state.prompt} onSubmit={submitToolInput} />
     );
   } else if (state.pending === "executing") {
-    assistantFooter = <CustomText color={GREEN}>{state.label}</CustomText>;
+    assistantFooter = <Text color={GREEN}>{state.label}</Text>;
   }
 
   return (
-    <Box flexDirection="column" backgroundColor={BG_PRIMARY}>
+    <Box flexDirection="column">
       <MessageList
         messages={displayedMessages}
         assistantFooter={assistantFooter}

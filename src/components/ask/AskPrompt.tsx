@@ -1,10 +1,9 @@
 import * as React from "react";
-import { Box, useInput } from "ink";
+import { Box, Text, useInput } from "ink";
 
 import { Question as QuestionComponent } from "./Question";
-import { CustomText } from "../custom";
 
-import { BG_PRIMARY, PURPLE } from "../../colors";
+import { PURPLE } from "../../colors";
 import type { AskUserModelInput, AskUserUserInput } from "../../tools";
 import type { ToolPromptProps } from "../../tools/tool";
 
@@ -72,14 +71,14 @@ export function AskPrompt({
     <Box flexDirection="column" rowGap={1}>
       {questions.length > 1 && (
         <Box>
-          <CustomText color={BG_PRIMARY} backgroundColor={PURPLE}>
-            {` Question ${activeIndex + 1} of ${questions.length} `}
-          </CustomText>
-          <CustomText> </CustomText>
+          <Text color={PURPLE} bold>
+            {`[Question ${activeIndex + 1} of ${questions.length}]`}
+          </Text>
+          <Text> </Text>
           {responses.map((response, i) => (
-            <CustomText key={i} dimColor={activeIndex !== i}>
+            <Text key={i} dimColor={activeIndex !== i}>
               {response ? " [*]" : " [ ]"}
-            </CustomText>
+            </Text>
           ))}
         </Box>
       )}
@@ -92,17 +91,17 @@ export function AskPrompt({
       <Box flexDirection="row" columnGap={2}>
         {questions.length > 1 && (
           <Box flexDirection="row">
-            <CustomText>⇆</CustomText>
-            <CustomText dimColor>{" navigate"}</CustomText>
+            <Text>⇆</Text>
+            <Text dimColor>{" navigate"}</Text>
           </Box>
         )}
         <Box flexDirection="row">
-          <CustomText>↑↓</CustomText>
-          <CustomText dimColor>{" select"}</CustomText>
+          <Text>↑↓</Text>
+          <Text dimColor>{" select"}</Text>
         </Box>
         <Box flexDirection="row">
-          <CustomText>↵</CustomText>
-          <CustomText dimColor>{" submit"}</CustomText>
+          <Text>↵</Text>
+          <Text dimColor>{" submit"}</Text>
         </Box>
       </Box>
     </Box>

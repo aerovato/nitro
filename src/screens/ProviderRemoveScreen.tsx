@@ -1,7 +1,7 @@
 import * as React from "react";
-import { Box, useApp } from "ink";
+import { Box, Text, useApp } from "ink";
 
-import { CustomSelect, CustomSelectOption, CustomText } from "../components";
+import { CustomSelect, CustomSelectOption } from "../components";
 
 import {
   listProviders,
@@ -9,7 +9,7 @@ import {
   getDefaultProvider,
 } from "../logic/provider";
 import { renderWithColor } from "../utils";
-import { FG_SECONDARY, RED, YELLOW } from "../colors";
+import { RED, YELLOW } from "../colors";
 
 const CANCEL_OPTION_VALUE = "__cancel__";
 
@@ -78,22 +78,18 @@ export function ProviderRemoveScreen(): React.ReactElement {
   };
 
   if (providers.length === 0) {
-    return <CustomText color={RED}>No providers configured</CustomText>;
+    return <Text color={RED}>No providers configured</Text>;
   }
 
   if (step.type === "cancel") {
-    return <CustomText color={FG_SECONDARY}>Cancelled</CustomText>;
+    return <Text dimColor>Cancelled</Text>;
   }
 
   if (step.type === "done") {
     if (step.removed) {
-      return (
-        <CustomText color={YELLOW}>
-          Provider "{step.provider}" removed
-        </CustomText>
-      );
+      return <Text color={YELLOW}>Provider "{step.provider}" removed</Text>;
     } else {
-      return <CustomText color={FG_SECONDARY}>Cancelled</CustomText>;
+      return <Text dimColor>Cancelled</Text>;
     }
   }
 
@@ -101,7 +97,7 @@ export function ProviderRemoveScreen(): React.ReactElement {
     <Box flexDirection="column">
       {step.type === "select" && (
         <>
-          <CustomText dimColor>Select provider to remove:</CustomText>
+          <Text dimColor>Select provider to remove:</Text>
           <CustomSelect
             options={selectOptions}
             focusedIndex={focusedIndex}
@@ -113,7 +109,7 @@ export function ProviderRemoveScreen(): React.ReactElement {
 
       {step.type === "confirm" && (
         <>
-          <CustomText dimColor>Remove provider "{step.provider}"?</CustomText>
+          <Text dimColor>Remove provider "{step.provider}"?</Text>
           <CustomSelect
             options={confirmOptions}
             focusedIndex={focusedIndex}

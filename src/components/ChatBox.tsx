@@ -1,5 +1,4 @@
 import { Box } from "ink";
-import { BG_SECONDARY } from "../colors";
 import { CustomTextInput } from "./custom";
 
 export interface InputBoxProps {
@@ -16,13 +15,23 @@ export function ChatBox({
   onSubmit,
 }: InputBoxProps): React.ReactElement {
   return (
-    <Box backgroundColor={BG_SECONDARY} paddingY={1} paddingX={3}>
-      <CustomTextInput
-        value={inputValue}
-        onChange={onChange}
-        onSubmit={onSubmit}
-        placeholder={placeholder}
-      />
+    <Box width="100%" paddingY={1}>
+      <Box
+        width="100%"
+        borderStyle="single"
+        borderTop={false}
+        borderRight={false}
+        borderBottom={false}
+        borderColor="gray"
+        paddingLeft={2}
+      >
+        <CustomTextInput
+          value={inputValue}
+          onChange={onChange}
+          onSubmit={onSubmit}
+          placeholder={placeholder}
+        />
+      </Box>
     </Box>
   );
 }

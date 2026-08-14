@@ -4,11 +4,11 @@ import type {
   ToolCallPart,
   ToolModelMessage,
 } from "ai";
+import { Text } from "ink";
 import { render } from "ink-testing-library";
 import { describe, expect, it } from "vitest";
 
 import { ChatConfigContext } from "../src/components/ChatConfigContext";
-import { CustomText } from "../src/components/custom";
 import { MessageList } from "../src/components/Message";
 import type { ProviderInfoWithName } from "../src/logic/provider";
 import { DEFAULT_SETTINGS } from "../src/logic/settings";
@@ -97,7 +97,7 @@ describe("message spacing", () => {
 
     expect(
       renderMessages([{ role: "user", content: "Request" }, assistant], true),
-    ).toEqual(["", "   Request", "", "", "   Thinking", "", "   Answer", ""]);
+    ).toEqual(["", "│  Request", "", "", "   Thinking", "", "   Answer", ""]);
   });
 
   it("keeps tool activity inside one assistant turn", () => {
@@ -113,7 +113,7 @@ describe("message spacing", () => {
 
     expect(renderMessages(messages, false)).toEqual([
       "",
-      "   Request",
+      "│  Request",
       "",
       "",
       "   Checking",
@@ -138,7 +138,7 @@ describe("message spacing", () => {
     ];
 
     expect(
-      renderMessages(messages, false, <CustomText>Running Bash...</CustomText>),
-    ).toEqual(["", "   Request", "", "", "   Running Bash...", ""]);
+      renderMessages(messages, false, <Text>Running Bash...</Text>),
+    ).toEqual(["", "│  Request", "", "", "   Running Bash...", ""]);
   });
 });

@@ -1,7 +1,5 @@
 import * as React from "react";
-import { Box } from "ink";
-
-import { CustomText } from "../components";
+import { Box, Text } from "ink";
 
 import {
   getDefaultProvider,
@@ -34,27 +32,27 @@ function ProviderDisplay({
   return (
     <Box flexDirection="column">
       <Box>
-        <CustomText color={isDefault ? PURPLE : AQUA}>
+        <Text color={isDefault ? PURPLE : AQUA}>
           {provider.name}
           {isDefault ? " (default)" : ""}
-        </CustomText>
+        </Text>
       </Box>
       <Box paddingLeft={2} flexDirection="column">
         <Box>
-          <CustomText dimColor>Base URL:</CustomText>
-          <CustomText>{provider.baseURL}</CustomText>
+          <Text dimColor>Base URL:</Text>
+          <Text>{provider.baseURL}</Text>
         </Box>
         <Box>
-          <CustomText dimColor>API Key:</CustomText>
-          <CustomText>{censorApiKey(provider.apiKey)}</CustomText>
+          <Text dimColor>API Key:</Text>
+          <Text>{censorApiKey(provider.apiKey)}</Text>
         </Box>
         <Box>
-          <CustomText dimColor>Model:</CustomText>
-          <CustomText>{provider.model}</CustomText>
+          <Text dimColor>Model:</Text>
+          <Text>{provider.model}</Text>
         </Box>
         <Box>
-          <CustomText dimColor>API Type:</CustomText>
-          <CustomText>{provider.apiType}</CustomText>
+          <Text dimColor>API Type:</Text>
+          <Text>{provider.apiType}</Text>
         </Box>
       </Box>
     </Box>
@@ -66,7 +64,7 @@ export function ProviderListScreen(): React.ReactElement {
   const defaultProvider = React.useMemo(() => getDefaultProvider(), []);
 
   if (providers.length === 0) {
-    return <CustomText dimColor>No providers configured</CustomText>;
+    return <Text dimColor>No providers configured</Text>;
   }
 
   return (

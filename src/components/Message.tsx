@@ -5,11 +5,9 @@ import {
   UserModelMessage,
 } from "@ai-sdk/provider-utils";
 import { AssistantModelMessage, ModelMessage, TextPart } from "ai";
-import { Box } from "ink";
+import { Box, Text } from "ink";
 import React from "react";
-import { CustomText } from "./custom";
 import { ToolResultDisplay } from "./ToolResultDisplay";
-import { BG_PRIMARY, BG_SECONDARY, FG_PRIMARY } from "../colors";
 import { useChatConfig } from "./ChatConfigContext";
 
 type AssistantTurnMessage = AssistantModelMessage | ToolModelMessage;
@@ -67,11 +65,11 @@ function AssistantMessage({
 }
 
 function ReasoningPartBlock({ text }: { text: string }): React.ReactElement {
-  return <CustomText dimColor>{text.trim()}</CustomText>;
+  return <Text dimColor>{text.trim()}</Text>;
 }
 
 function TextPartBlock({ text }: { text: string }): React.ReactElement {
-  return <CustomText>{text.trim()}</CustomText>;
+  return <Text>{text.trim()}</Text>;
 }
 
 function UserMessage({
@@ -87,18 +85,22 @@ function UserMessage({
     parts.push(...content.filter(part => part.type === "text"));
   }
   return (
-    <Box
-      flexDirection="column"
-      width="100%"
-      backgroundColor={BG_SECONDARY}
-      paddingX={3}
-      paddingY={1}
-    >
-      {parts.map((part, i) => (
-        <CustomText key={i} color={FG_PRIMARY}>
-          {part.text.trim()}
-        </CustomText>
-      ))}
+    <Box flexDirection="column" width="100%" paddingY={1}>
+      <Box
+        flexDirection="column"
+        width="100%"
+        borderStyle="single"
+        borderTop={false}
+        borderRight={false}
+        borderBottom={false}
+        borderColor="gray"
+        paddingLeft={2}
+        rowGap={1}
+      >
+        {parts.map((part, i) => (
+          <Text key={i}>{part.text.trim()}</Text>
+        ))}
+      </Box>
     </Box>
   );
 }
@@ -150,7 +152,6 @@ function AssistantTurn({
     <Box
       flexDirection="column"
       width="100%"
-      backgroundColor={BG_PRIMARY}
       rowGap={1}
       paddingX={3}
       paddingY={1}

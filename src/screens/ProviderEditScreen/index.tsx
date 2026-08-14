@@ -1,6 +1,6 @@
 import * as React from "react";
-import { Box, useApp } from "ink";
-import { CustomSelect, CustomText, CustomTextInput } from "../../components";
+import { Box, Text, useApp } from "ink";
+import { CustomSelect, CustomTextInput } from "../../components";
 import { renderWithColor } from "../../utils";
 import { RED, GREEN, YELLOW } from "../../colors";
 import { useProviderEditState } from "../../hooks/useProviderEditState";
@@ -30,34 +30,32 @@ function FormSummary({
     <>
       {isPastStep(step, "select") && (
         <Box>
-          <CustomText dimColor>Provider: </CustomText>
-          <CustomText bold>{providerName}</CustomText>
+          <Text dimColor>Provider: </Text>
+          <Text bold>{providerName}</Text>
         </Box>
       )}
       {isPastStep(step, "baseURL") && (
         <Box>
-          <CustomText dimColor>Base URL: </CustomText>
-          <CustomText>{form.baseURL}</CustomText>
+          <Text dimColor>Base URL: </Text>
+          <Text>{form.baseURL}</Text>
         </Box>
       )}
       {isPastStep(step, "apiType") && (
         <Box>
-          <CustomText dimColor>API Type: </CustomText>
-          <CustomText>{form.apiType}</CustomText>
+          <Text dimColor>API Type: </Text>
+          <Text>{form.apiType}</Text>
         </Box>
       )}
       {isPastStep(step, "apiKey") && (
         <Box>
-          <CustomText dimColor>API Key: </CustomText>
-          <CustomText>
-            {form.apiKey ? censorApiKey(form.apiKey) : "(preserve)"}
-          </CustomText>
+          <Text dimColor>API Key: </Text>
+          <Text>{form.apiKey ? censorApiKey(form.apiKey) : "(preserve)"}</Text>
         </Box>
       )}
       {isPastStep(step, "model") && (
         <Box>
-          <CustomText dimColor>Model: </CustomText>
-          <CustomText>{form.model}</CustomText>
+          <Text dimColor>Model: </Text>
+          <Text>{form.model}</Text>
         </Box>
       )}
     </>
@@ -83,12 +81,12 @@ function TextStep({
 }): React.ReactElement {
   return (
     <Box flexDirection="column">
-      <CustomText dimColor>
+      <Text dimColor>
         Current {label}: {currentValue}
-      </CustomText>
-      {error && <CustomText color={RED}>{error}</CustomText>}
+      </Text>
+      {error && <Text color={RED}>{error}</Text>}
       <Box>
-        <CustomText dimColor>{label}: </CustomText>
+        <Text dimColor>{label}: </Text>
         <CustomTextInput
           value={textInput}
           onChange={setTextInput}
@@ -117,10 +115,10 @@ function SelectStep({
 }): React.ReactElement {
   return (
     <Box flexDirection="column">
-      <CustomText dimColor>
+      <Text dimColor>
         Current {label}: {currentValue}
-      </CustomText>
-      <CustomText dimColor>{label}:</CustomText>
+      </Text>
+      <Text dimColor>{label}:</Text>
       <CustomSelect
         options={options}
         focusedIndex={focusedIndex}
@@ -156,13 +154,13 @@ function ModelStep({
 }): React.ReactElement {
   return (
     <Box flexDirection="column">
-      <CustomText dimColor>Current Model: {originalModel}</CustomText>
-      {error && <CustomText color={RED}>{error}</CustomText>}
+      <Text dimColor>Current Model: {originalModel}</Text>
+      {error && <Text color={RED}>{error}</Text>}
       {modelsLoading ? (
-        <CustomText color={YELLOW}>Fetching models...</CustomText>
+        <Text color={YELLOW}>Fetching models...</Text>
       ) : models.length > 0 ? (
         <>
-          <CustomText dimColor>Select a model:</CustomText>
+          <Text dimColor>Select a model:</Text>
           <CustomSelect
             options={[
               ...models.map(m => ({ value: m, label: m })),
@@ -175,7 +173,7 @@ function ModelStep({
         </>
       ) : (
         <Box>
-          <CustomText dimColor>Model: </CustomText>
+          <Text dimColor>Model: </Text>
           <CustomTextInput
             value={textInput}
             onChange={setTextInput}
@@ -199,15 +197,11 @@ export function ProviderEditScreen(): React.ReactElement {
   }, [state.step, exit]);
 
   if (state.providers.length === 0) {
-    return <CustomText color={RED}>No providers configured</CustomText>;
+    return <Text color={RED}>No providers configured</Text>;
   }
 
   if (state.step === "done") {
-    return (
-      <CustomText color={GREEN}>
-        Provider "{state.providerName}" updated
-      </CustomText>
-    );
+    return <Text color={GREEN}>Provider "{state.providerName}" updated</Text>;
   }
 
   const selectOptions = state.providers.map(p => ({ value: p, label: p }));
@@ -222,7 +216,7 @@ export function ProviderEditScreen(): React.ReactElement {
 
       {state.step === "select" && (
         <Box flexDirection="column">
-          <CustomText dimColor>Select provider to edit:</CustomText>
+          <Text dimColor>Select provider to edit:</Text>
           <CustomSelect
             options={selectOptions}
             focusedIndex={state.focusedIndex}

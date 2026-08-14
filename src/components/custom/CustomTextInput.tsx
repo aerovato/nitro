@@ -13,10 +13,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 */
 
 import { useState, useEffect } from "react";
-import { useInput } from "ink";
+import { Text, useInput } from "ink";
 import chalk from "chalk";
-import { CustomText } from "./CustomText";
-import { FG_PRIMARY, FG_SECONDARY } from "../../colors";
 
 export type Props = {
   /**
@@ -209,9 +207,6 @@ export function CustomTextInput({
     { isActive: focus },
   );
 
-  valueColor = valueColor ?? FG_PRIMARY;
-  placeholderColor = placeholderColor ?? FG_SECONDARY;
-
   const textColor = placeholder
     ? value.length > 0
       ? valueColor
@@ -219,12 +214,15 @@ export function CustomTextInput({
     : valueColor;
 
   return (
-    <CustomText dimColor={dimColor} color={textColor}>
+    <Text
+      dimColor={dimColor || (placeholder.length > 0 && value.length === 0)}
+      color={textColor}
+    >
       {placeholder
         ? value.length > 0
           ? renderedValue
           : renderedPlaceholder
         : renderedValue}
-    </CustomText>
+    </Text>
   );
 }

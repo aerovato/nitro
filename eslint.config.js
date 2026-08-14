@@ -45,11 +45,6 @@ export default defineConfig(
           paths: [
             {
               name: "ink",
-              importNames: ["Text"],
-              message: "Use CustomText.tsx instead.",
-            },
-            {
-              name: "ink",
               importNames: ["render"],
               message: "Use renderWithColor() from utils.ts instead.",
             },

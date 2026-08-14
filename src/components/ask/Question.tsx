@@ -1,10 +1,10 @@
 import * as React from "react";
-import { Box, useInput } from "ink";
+import { Box, Text, useInput } from "ink";
 
-import { CustomText, CustomTextInput } from "../custom";
+import { CustomTextInput } from "../custom";
 
 import type { Question } from "../../tools";
-import { FG_PRIMARY, BLUE, PURPLE, GREEN, AQUA } from "../../colors";
+import { BLUE, PURPLE, GREEN, AQUA } from "../../colors";
 import { QuestionSelection } from "./AskPrompt";
 
 const CUSTOM_LABEL = "Type your own answer...";
@@ -33,18 +33,18 @@ function OptionRow({
         ? BLUE
         : previouslySubmitted
           ? GREEN
-          : FG_PRIMARY;
+          : undefined;
   return (
     <Box flexDirection="row">
-      <CustomText dimColor={!focused} color={labelColor}>
+      <Text dimColor={!focused} color={labelColor}>
         {index}.{" "}
-      </CustomText>
+      </Text>
       <Box flexDirection="column">
-        <CustomText bold={focused} color={labelColor}>
+        <Text bold={focused} color={labelColor}>
           {label}
           {previouslySubmitted ? " (selected)" : ""}
-        </CustomText>
-        {description && <CustomText dimColor>{description}</CustomText>}
+        </Text>
+        {description && <Text dimColor>{description}</Text>}
         {maybeInput}
       </Box>
     </Box>
@@ -110,10 +110,10 @@ export function Question({
 
   return active ? (
     <Box flexDirection="column">
-      <CustomText bold color={PURPLE}>
+      <Text bold color={PURPLE}>
         {question.title}
-      </CustomText>
-      <CustomText>{question.question}</CustomText>
+      </Text>
+      <Text>{question.question}</Text>
       {choices.map((choice, i) => (
         <OptionRow
           key={i}
