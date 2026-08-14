@@ -13,7 +13,8 @@ import {
 import { getDefaultProvider } from "../logic/provider";
 import { useChatState } from "../hooks/useChatState";
 import { renderWithColor } from "../utils";
-import { BG_PRIMARY } from "../colors";
+import { BG_PRIMARY, GREEN } from "../colors";
+import { CustomText } from "../components/custom";
 import {
   ChatConfigProvider,
   useChatConfig,
@@ -35,7 +36,7 @@ function ChatScreenInner({
   const { exit } = useApp();
   const chatConfig = useChatConfig();
   const { usage } = useTokenUsage();
-  const { state, submitMessage, submitToolResults } = useChatState({
+  const { state, submitMessage, submitToolInput } = useChatState({
     ...chatConfig,
     initialFilename,
   });
@@ -64,19 +65,17 @@ function ChatScreenInner({
 
   const [sentInitial, setSentInitial] = React.useState(false);
   React.useEffect(() => {
-    if (!sentInitial) {
+    if (!sentInitial && initialRequest) {
       setSentInitial(true);
-      if (initialRequest) {
-        submitMessage(initialRequest);
-      }
+      submitMessage(initialRequest);
     }
-  }, [sentInitial, state.pending, initialRequest, submitMessage]);
+  }, [sentInitial, initialRequest, submitMessage]);
 
   const prevPending = React.useRef(state.pending);
   React.useEffect(() => {
     if (
       quitOnFinish
-      && prevPending.current === "provider"
+      && prevPending.current !== "user"
       && state.pending === "user"
     ) {
       exit();
@@ -97,10 +96,12 @@ function ChatScreenInner({
     <Box flexDirection="column" backgroundColor={BG_PRIMARY}>
       <MessageList messages={displayedMessages} />
       {state.pending === "tool" && (
-        <ToolDisplay
-          toolCalls={state.toolCalls}
-          submitToolResults={submitToolResults}
-        />
+        <ToolDisplay prompt={state.prompt} onSubmit={submitToolInput} />
+      )}
+      {state.pending === "executing" && (
+        <Box paddingX={3} paddingY={1}>
+          <CustomText color={GREEN}>{state.label}</CustomText>
+        </Box>
       )}
       {state.pending === "user" && !quitOnFinish && (
         <ChatBox

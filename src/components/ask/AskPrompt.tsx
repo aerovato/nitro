@@ -5,17 +5,12 @@ import { Question as QuestionComponent } from "./Question";
 import { CustomText } from "../custom";
 
 import { BG_PRIMARY, BG_SECONDARY, PURPLE } from "../../colors";
-import {
-  askTool,
-  AskUserModelInput,
-  AskUserToolOutput,
-  AskUserUserInput,
-} from "../../tools";
+import type { AskUserModelInput, AskUserUserInput } from "../../tools";
 import type { ToolPromptProps } from "../../tools/tool";
 
 export type AskPromptProps = ToolPromptProps<
   AskUserModelInput,
-  AskUserToolOutput
+  AskUserUserInput
 >;
 
 export interface QuestionSelection {
@@ -36,7 +31,7 @@ export function AskPrompt({
 
   const question = questions[activeIndex]!;
 
-  const handleAnswer = async (answer: string, choiceIndex: number) => {
+  const handleAnswer = (answer: string, choiceIndex: number) => {
     const updated = [...responses];
     updated[activeIndex] = {
       question: question.question,
@@ -59,8 +54,7 @@ export function AskPrompt({
             answer: r.answer,
           })),
         };
-        const output = await askTool.execute(modelInput, userInput);
-        onSubmit(output);
+        onSubmit(userInput);
       }
     }
   };
@@ -102,7 +96,7 @@ export function AskPrompt({
             active={active}
             question={question}
             response={responses[activeIndex]}
-            onAnswer={active ? handleAnswer : async () => {}}
+            onAnswer={active ? handleAnswer : () => {}}
             key={i}
           />
         );

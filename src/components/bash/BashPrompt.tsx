@@ -5,13 +5,11 @@ import { CustomText, CustomTextInput } from "../custom";
 
 import type {
   BashModelInput,
-  BashToolOutput,
+  BashUserInput,
   RiskLevel,
   BehaviorTag,
 } from "../../tools/bash";
 import type { ToolPromptProps } from "../../tools/tool";
-import { bashTool } from "../../tools/bash";
-import { ChatConfigContext } from "../ChatConfigContext";
 import {
   BG_PRIMARY,
   BG_SECONDARY,
@@ -19,9 +17,9 @@ import {
   FG_SECONDARY,
   RED,
   ORANGE,
-  YELLOW,
-  GREEN,
   BLUE,
+  GREEN,
+  YELLOW,
   AQUA,
   PURPLE,
 } from "../../colors";
@@ -60,41 +58,21 @@ const ACTIONS: { value: BashAction; label: string }[] = [
   },
 ];
 
-export type BashPromptProps = ToolPromptProps<BashModelInput, BashToolOutput>;
+export type BashPromptProps = ToolPromptProps<BashModelInput, BashUserInput>;
 
 export function BashPrompt({
   modelInput,
   onSubmit,
 }: BashPromptProps): React.ReactElement {
   const { exit } = useApp();
-  const chatConfig = React.useContext(ChatConfigContext);
   const { command, explanation, behaviorTags, riskLevel } = modelInput;
   const riskColor = RISK_COLORS[riskLevel];
 
   const [focusedIndex, setFocusedIndex] = React.useState(0);
   const [editing, setEditing] = React.useState(false);
   const [inputValue, setInputValue] = React.useState("");
-  const [executing, setExecuting] = React.useState(false);
 
-  // Auto-approve "Read Only" commands when not in strict mode
-  React.useEffect(() => {
-    if (executing) return;
-
-    const shouldAutoApprove =
-      riskLevel === "Read Only" && !chatConfig?.settings.alwaysConfirm;
-
-    if (shouldAutoApprove) {
-      setExecuting(true);
-      void bashTool.execute(modelInput, { approved: true }).then(output => {
-        onSubmit(output);
-      });
-    }
-  }, [riskLevel, chatConfig, modelInput, onSubmit, executing]);
-
-  // eslint-disable-next-line @typescript-eslint/no-misused-promises
-  useInput(async (_input, key) => {
-    if (executing) return;
-
+  useInput((_input, key) => {
     if (editing) {
       if (key.escape) {
         setEditing(false);
@@ -102,12 +80,10 @@ export function BashPrompt({
       if (key.return) {
         const trimmed = inputValue.trim();
         setEditing(false);
-        setExecuting(true);
-        const output = await bashTool.execute(modelInput, {
+        onSubmit({
           approved: false,
           rejectionMessage: trimmed.length > 0 ? trimmed : undefined,
         });
-        onSubmit(output);
       }
       return;
     }
@@ -120,9 +96,7 @@ export function BashPrompt({
     if (key.return) {
       const action = ACTIONS[focusedIndex]!;
       if (action.value === "approve") {
-        setExecuting(true);
-        const output = await bashTool.execute(modelInput, { approved: true });
-        onSubmit(output);
+        onSubmit({ approved: true });
       } else if (action.value === "reject") {
         setEditing(true);
       } else {
@@ -130,14 +104,6 @@ export function BashPrompt({
       }
     }
   });
-
-  if (executing) {
-    return (
-      <Box flexDirection="column" paddingX={3} paddingY={1}>
-        <CustomText color={GREEN}>Running: {command}</CustomText>
-      </Box>
-    );
-  }
 
   return (
     <Box

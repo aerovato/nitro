@@ -7,9 +7,9 @@ import { CustomText } from "../components/custom/CustomText";
 import { RED } from "../colors";
 import type { Settings } from "../logic/settings";
 
-export type ToolPromptProps<TModelInput, TOutput> = {
+export type ToolPromptProps<TModelInput, TUserInput> = {
   modelInput: TModelInput;
-  onSubmit: (output: TOutput) => void;
+  onSubmit: (userInput: TUserInput) => void;
 };
 
 type ObjectSchema = z.ZodType<Record<string, unknown>>;
@@ -30,6 +30,26 @@ export abstract class NitroTool<
     userInput: z.infer<TUserInput>,
   ): Promise<z.infer<TOutput>>;
 
+  // Return user input to use without prompting the user, or null to prompt
+  autoApproveInput(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    _modelInput: z.infer<TModelInput>,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    _settings: Settings,
+  ): z.infer<TUserInput> | null {
+    return null;
+  }
+
+  // Return a label to display while executing, or null for no display
+  runningLabel(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    _modelInput: z.infer<TModelInput>,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    _userInput: z.infer<TUserInput>,
+  ): string | null {
+    return null;
+  }
+
   createTool(): Tool {
     return tool({
       description: this.description,
@@ -41,6 +61,12 @@ export abstract class NitroTool<
     input: unknown,
   ): z.ZodSafeParseResult<z.core.output<TModelInput>> {
     return this.modelInputSchema.safeParse(input);
+  }
+
+  validateUserInput(
+    input: unknown,
+  ): z.ZodSafeParseResult<z.core.output<TUserInput>> {
+    return this.userInputSchema.safeParse(input);
   }
 
   static validationError(

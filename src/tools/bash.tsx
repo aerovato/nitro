@@ -166,6 +166,23 @@ export class BashTool extends NitroTool<
   readonly userInputSchema = UserInputSchema;
   readonly outputSchema = OutputSchema;
 
+  override autoApproveInput(
+    modelInput: BashModelInput,
+    settings: Settings,
+  ): BashUserInput | null {
+    if (modelInput.riskLevel === "Read Only" && !settings.alwaysConfirm) {
+      return { approved: true };
+    }
+    return null;
+  }
+
+  override runningLabel(
+    modelInput: BashModelInput,
+    userInput: BashUserInput,
+  ): string | null {
+    return userInput.approved ? `Running: ${modelInput.command}` : null;
+  }
+
   async execute(
     modelInput: BashModelInput,
     userInput: BashUserInput,

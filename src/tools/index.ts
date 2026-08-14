@@ -1,4 +1,4 @@
-import type { ToolSet, ToolCallPart } from "ai";
+import type { ToolSet } from "ai";
 import type { z } from "zod";
 
 import { askTool } from "./ask";
@@ -9,34 +9,23 @@ export * from "./ask";
 export * from "./bash";
 export * from "./tool";
 
-const ALL_TOOLS = {
-  [askTool.name]: askTool,
-  [bashTool.name]: bashTool,
-} satisfies Record<
-  string,
-  NitroTool<
-    z.ZodType<Record<string, unknown>>,
-    z.ZodType<Record<string, unknown>>,
-    z.ZodType<Record<string, unknown>>
-  >
+type AnyNitroTool = NitroTool<
+  z.ZodType<Record<string, unknown>>,
+  z.ZodType<Record<string, unknown>>,
+  z.ZodType<Record<string, unknown>>
 >;
 
-type ALL_TOOL_NAMES = keyof typeof ALL_TOOLS;
+const ALL_TOOLS: Record<string, AnyNitroTool> = {
+  [askTool.name]: askTool,
+  [bashTool.name]: bashTool,
+};
 
-export function getToolInstance(toolName: string) {
-  const tool = ALL_TOOLS[toolName as ALL_TOOL_NAMES];
+export function getToolInstance(toolName: string): AnyNitroTool | null {
+  const tool = ALL_TOOLS[toolName];
   if (!tool) {
     return null;
   }
   return tool;
-}
-
-export function validateToolCall(toolCall: ToolCallPart) {
-  const tool = ALL_TOOLS[toolCall.toolName as ALL_TOOL_NAMES];
-  if (!tool) {
-    return null;
-  }
-  return tool.validateModelInput(toolCall.input);
 }
 
 export function createToolSet(): ToolSet {
