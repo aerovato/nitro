@@ -1,16 +1,9 @@
-import { YELLOW, GREEN, PURPLE } from "../colors";
+import chalk from "chalk";
 import pkg from "../../package.json";
 
 const CURRENT_VERSION: string = pkg.version;
 const NPM_REGISTRY_URL = "https://registry.npmjs.org/@aerovato/nitro/latest";
 const FETCH_TIMEOUT_MS = 5000;
-
-function colorHex(hex: string, text: string): string {
-  const r = parseInt(hex.slice(1, 3), 16);
-  const g = parseInt(hex.slice(3, 5), 16);
-  const b = parseInt(hex.slice(5, 7), 16);
-  return `\x1b[38;2;${r};${g};${b}m${text}\x1b[0m`;
-}
 
 interface NpmRegistryResponse {
   version?: unknown;
@@ -76,11 +69,11 @@ export function getUpdateResult(): string | null {
 export function formatUpdateMessage(latestVersion: string): string {
   return (
     "\nUpdate available: "
-    + colorHex(YELLOW, CURRENT_VERSION)
+    + chalk.yellow(CURRENT_VERSION)
     + " → "
-    + colorHex(GREEN, latestVersion)
+    + chalk.green(latestVersion)
     + "\nRun "
-    + colorHex(PURPLE, "npm install -g @aerovato/nitro")
+    + chalk.magenta("npm install -g @aerovato/nitro")
     + " to update"
   );
 }

@@ -1,9 +1,9 @@
 import * as React from "react";
-import { Box, useApp } from "ink";
+import { Box, Text, useApp } from "ink";
 
-import { CustomSelect, CustomSelectOption, CustomText } from "../components";
+import { CustomSelect, CustomSelectOption } from "../components";
 import { renderWithColor } from "../utils";
-import { YELLOW, FG_SECONDARY } from "../colors";
+import { YELLOW } from "../colors";
 
 const CANCEL_VALUE = "__cancel__";
 const DEFAULT_VALUE = "default";
@@ -58,12 +58,12 @@ function ProviderRouterScreenInternal({
   };
 
   if (state.type === "selected" && state.subcommand === null) {
-    return <CustomText color={FG_SECONDARY}>Cancelled</CustomText>;
+    return <Text dimColor>Cancelled</Text>;
   }
 
   return (
     <Box flexDirection="column">
-      <CustomText dimColor>Select an action:</CustomText>
+      <Text dimColor>Select an action:</Text>
       <CustomSelect
         options={OPTIONS}
         focusedIndex={focusedIndex}

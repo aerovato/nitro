@@ -85,8 +85,8 @@ describe("BashPrompt", () => {
       <BashPrompt modelInput={readOnlyInput} onSubmit={onSubmit} />,
     );
     const output = lastFrame();
-    expect(output).toContain(`touch ${SENTINEL_FILE}`);
-    expect(output).toContain("Sentinel command for safety verification.");
+    expect(output).toContain(`# Sentinel command for safety verification.`);
+    expect(output).toContain(`$ touch ${SENTINEL_FILE}`);
     expect(output).toContain("Read Only");
     expect(output).toContain("Approve and Run");
     expect(output).toContain("Reject with Message");

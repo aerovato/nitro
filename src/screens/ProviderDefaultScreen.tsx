@@ -1,7 +1,7 @@
 import * as React from "react";
-import { Box, useApp } from "ink";
+import { Box, Text, useApp } from "ink";
 
-import { CustomSelect, CustomSelectOption, CustomText } from "../components";
+import { CustomSelect, CustomSelectOption } from "../components";
 
 import {
   listProviders,
@@ -9,7 +9,7 @@ import {
   getDefaultProvider,
 } from "../logic/provider";
 import { renderWithColor } from "../utils";
-import { RED, GREEN, YELLOW, FG_SECONDARY } from "../colors";
+import { RED, GREEN, YELLOW } from "../colors";
 
 const CANCEL_OPTION_VALUE = "__cancel__";
 
@@ -62,32 +62,30 @@ export function ProviderDefaultScreen(): React.ReactElement {
   };
 
   if (providers.length === 0) {
-    return <CustomText color={RED}>No providers configured</CustomText>;
+    return <Text color={RED}>No providers configured</Text>;
   }
 
   if (step.type === "cancel") {
-    return <CustomText color={FG_SECONDARY}>Cancelled</CustomText>;
+    return <Text dimColor>Cancelled</Text>;
   }
 
   if (step.type === "done") {
     if (step.success) {
       return (
-        <CustomText color={GREEN}>
-          Default provider set to "{step.provider}"
-        </CustomText>
+        <Text color={GREEN}>Default provider set to "{step.provider}"</Text>
       );
     } else {
       return (
-        <CustomText color={RED}>
+        <Text color={RED}>
           Failed to set "{step.provider}" as default provider
-        </CustomText>
+        </Text>
       );
     }
   }
 
   return (
     <Box flexDirection="column">
-      <CustomText dimColor>Select default provider:</CustomText>
+      <Text dimColor>Select default provider:</Text>
       <CustomSelect
         options={selectOptions}
         focusedIndex={focusedIndex}

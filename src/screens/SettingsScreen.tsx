@@ -1,8 +1,8 @@
 import * as React from "react";
-import { Box, useApp } from "ink";
+import { Box, Text, useApp } from "ink";
 import { Select } from "@inkjs/ui";
 
-import { CustomSelect, CustomText, CustomTextInput } from "../components";
+import { CustomSelect, CustomTextInput } from "../components";
 
 import {
   loadSettings,
@@ -105,9 +105,9 @@ export function SettingsScreen(): React.ReactElement {
   if (step.type === "menu") {
     return (
       <Box flexDirection="column">
-        <CustomText dimColor>
+        <Text dimColor>
           Select a setting to configure. Select Done to exit.
-        </CustomText>
+        </Text>
         <CustomSelect
           options={menuOptions}
           focusedIndex={focusedIndex}
@@ -127,7 +127,7 @@ export function SettingsScreen(): React.ReactElement {
       })) ?? [];
     return (
       <Box flexDirection="column">
-        <CustomText dimColor>{step.meta.label}</CustomText>
+        <Text dimColor>{step.meta.label}</Text>
         <Select options={options} onChange={handleSelectOption} />
       </Box>
     );
@@ -136,12 +136,12 @@ export function SettingsScreen(): React.ReactElement {
   if (step.type === "edit-text") {
     return (
       <Box flexDirection="column">
-        <CustomText dimColor>
+        <Text dimColor>
           {step.meta.label}: {step.meta.description}
-        </CustomText>
-        {step.error && <CustomText color={RED}>{step.error}</CustomText>}
+        </Text>
+        {step.error && <Text color={RED}>{step.error}</Text>}
         <Box>
-          <CustomText dimColor>Value: </CustomText>
+          <Text dimColor>Value: </Text>
           <CustomTextInput
             value={textInput}
             onChange={setTextInput}
@@ -152,7 +152,7 @@ export function SettingsScreen(): React.ReactElement {
     );
   }
 
-  return <CustomText>Settings saved.</CustomText>;
+  return <Text>Settings saved.</Text>;
 }
 
 export async function runSettingsScreen(): Promise<void> {

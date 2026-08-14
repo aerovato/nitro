@@ -32,10 +32,8 @@ function printUsage(): void {
     "",
     "Commands:",
     `  "<request>"                    Execute request and exit (2+ words)`,
-    "  interactive, i [<request>]     Start interactive session",
     "  continue, c <request>          Continue last conversation",
-    "  resume, r [<request>]          Resume last conversation interactively",
-    "  strict, s [<request>]          Run in strict mode (always confirm commands)",
+    "  strict, s <request>            Run in strict mode (always confirm commands)",
     "  help                           Print this help message",
     "  settings                       Configure Nitro settings",
     "  provider                       Manage AI providers",
@@ -70,19 +68,11 @@ async function main(args: string[]): Promise<void> {
     case "provider":
       await runProviderScreen(args.slice(1));
       return;
-    case "interactive":
-    case "i": {
-      void startUpdateCheck();
-      const request = args[1] ?? "";
-      await runChatScreen({ initialRequest: request, quitOnFinish: false });
-      break;
-    }
     case "continue":
     case "c": {
       const request = args[1];
       if (!request) {
         outputError("Error: continue requires a request argument.");
-        outputError("Use resume to interactively resume.");
         process.exit(1);
       }
       const filename = getLastConversationFilename();
@@ -93,7 +83,6 @@ async function main(args: string[]): Promise<void> {
       void startUpdateCheck();
       await runChatScreen({
         initialRequest: request,
-        quitOnFinish: true,
         initialFilename: filename,
         hidePreviousMessages: true,
       });
@@ -102,34 +91,21 @@ async function main(args: string[]): Promise<void> {
     case "strict":
     case "s": {
       void startUpdateCheck();
-      const request = args[1] ?? "";
-      await runChatScreen({
-        initialRequest: request,
-        quitOnFinish: false,
-        strictMode: true,
-      });
-      break;
-    }
-    case "resume":
-    case "r": {
-      const request = args[1] ?? "";
-      const filename = getLastConversationFilename();
-      if (!filename) {
-        outputError("Error: No conversation to resume.");
+      const request = args[1];
+      if (!request) {
+        outputError("Error: strict requires a request argument.");
         process.exit(1);
       }
-      void startUpdateCheck();
       await runChatScreen({
         initialRequest: request,
-        quitOnFinish: false,
-        initialFilename: filename,
+        strictMode: true,
       });
       break;
     }
     default:
       if (command.includes(" ")) {
         void startUpdateCheck();
-        await runChatScreen({ initialRequest: command, quitOnFinish: true });
+        await runChatScreen({ initialRequest: command });
         break;
       }
       outputError(`Unknown subcommand: ${command}`);

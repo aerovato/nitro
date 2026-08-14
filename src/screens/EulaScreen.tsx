@@ -1,7 +1,7 @@
 import * as React from "react";
-import { Box, useApp } from "ink";
+import { Box, Text, useApp } from "ink";
 
-import { CustomSelect, CustomText } from "../components";
+import { CustomSelect } from "../components";
 import { renderWithColor } from "../utils";
 import { GREEN, RED } from "../colors";
 import { loadSettings, saveSettings } from "../logic/settings";
@@ -43,30 +43,28 @@ export function EulaScreen(): React.ReactElement {
 
   if (step.type === "declined") {
     return (
-      <CustomText color={RED}>
+      <Text color={RED}>
         EULA declined. Nitro cannot be used without accepting the EULA.
-      </CustomText>
+      </Text>
     );
   }
 
   if (step.type === "accepted") {
-    return (
-      <CustomText color={GREEN}>EULA accepted. Welcome to Nitro!</CustomText>
-    );
+    return <Text color={GREEN}>EULA accepted. Welcome to Nitro!</Text>;
   }
 
   return (
     <Box flexDirection="column">
-      <CustomText bold>End User License Agreement</CustomText>
+      <Text bold>End User License Agreement</Text>
       <Box marginTop={1} flexDirection="column">
         {EULA_TEXT.split("\n").map((line, i) => (
-          <CustomText key={i} dimColor>
+          <Text key={i} dimColor>
             {line}
-          </CustomText>
+          </Text>
         ))}
       </Box>
       <Box marginTop={1}>
-        <CustomText dimColor>Do you accept the EULA?</CustomText>
+        <Text dimColor>Do you accept the EULA?</Text>
       </Box>
       <CustomSelect
         options={options}

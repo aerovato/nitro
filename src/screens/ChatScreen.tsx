@@ -1,9 +1,8 @@
 import * as React from "react";
-import { Box, useApp } from "ink";
+import { Box, Text, useApp } from "ink";
 
 import { runProviderDefaultScreen } from "./ProviderDefaultScreen";
 import {
-  ChatBox,
   MessageList,
   ToolDisplay,
   TokenUsageProvider,
@@ -13,8 +12,7 @@ import {
 import { getDefaultProvider } from "../logic/provider";
 import { useChatState } from "../hooks/useChatState";
 import { renderWithColor } from "../utils";
-import { BG_PRIMARY, GREEN } from "../colors";
-import { CustomText } from "../components/custom";
+import { GREEN, YELLOW } from "../colors";
 import {
   ChatConfigProvider,
   useChatConfig,
@@ -22,14 +20,12 @@ import {
 
 interface ChatScreenProps {
   initialRequest: string;
-  quitOnFinish: boolean;
   initialFilename?: string;
   hidePreviousMessages?: boolean;
 }
 
 function ChatScreenInner({
   initialRequest,
-  quitOnFinish,
   initialFilename,
   hidePreviousMessages,
 }: ChatScreenProps): React.ReactElement | null {
@@ -73,17 +69,11 @@ function ChatScreenInner({
 
   const prevPending = React.useRef(state.pending);
   React.useEffect(() => {
-    if (
-      quitOnFinish
-      && prevPending.current !== "user"
-      && state.pending === "user"
-    ) {
+    if (prevPending.current !== "user" && state.pending === "user") {
       exit();
     }
     prevPending.current = state.pending;
-  }, [quitOnFinish, state.pending, exit]);
-
-  const [inputValue, setInputValue] = React.useState("");
+  }, [state.pending, exit]);
 
   const [initialMessageCount] = React.useState<number>(
     hidePreviousMessages ? messages.length : 0,
@@ -92,33 +82,32 @@ function ChatScreenInner({
     ? messages.slice(initialMessageCount ?? 0)
     : messages;
 
+  let assistantFooter: React.ReactNode = null;
+  if (state.pending === "tool") {
+    assistantFooter = (
+      <ToolDisplay prompt={state.prompt} onSubmit={submitToolInput} />
+    );
+  } else if (state.pending === "executing") {
+    assistantFooter = (
+      <Box
+        borderStyle="single"
+        borderTop={false}
+        borderRight={false}
+        borderBottom={false}
+        borderColor={YELLOW}
+        paddingLeft={2}
+      >
+        <Text color={GREEN}>{state.label}</Text>
+      </Box>
+    );
+  }
+
   return (
-    <Box flexDirection="column" backgroundColor={BG_PRIMARY}>
-      <MessageList messages={displayedMessages} />
-      {state.pending === "tool" && (
-        <ToolDisplay prompt={state.prompt} onSubmit={submitToolInput} />
-      )}
-      {state.pending === "executing" && (
-        <Box paddingX={3} paddingY={1}>
-          <CustomText color={GREEN}>{state.label}</CustomText>
-        </Box>
-      )}
-      {state.pending === "user" && !quitOnFinish && (
-        <ChatBox
-          inputValue={inputValue}
-          placeholder={
-            messages.length === 0
-              ? "Ask for anything..."
-              : "Send another request..."
-          }
-          onChange={setInputValue}
-          onSubmit={() => {
-            if (submitMessage(inputValue)) {
-              setInputValue("");
-            }
-          }}
-        />
-      )}
+    <Box flexDirection="column">
+      <MessageList
+        messages={displayedMessages}
+        assistantFooter={assistantFooter}
+      />
     </Box>
   );
 }
@@ -132,8 +121,7 @@ export function ChatScreen(props: ChatScreenProps): React.ReactElement {
 }
 
 export interface RunChatScreenOptions {
-  initialRequest?: string;
-  quitOnFinish: boolean;
+  initialRequest: string;
   initialFilename?: string;
   hidePreviousMessages?: boolean;
   strictMode?: boolean;
@@ -160,8 +148,7 @@ export async function runChatScreen(
   const { waitUntilExit } = await renderWithColor(
     <ChatConfigProvider settingsOverride={settingsOverride}>
       <ChatScreen
-        initialRequest={options.initialRequest ?? ""}
-        quitOnFinish={options.quitOnFinish}
+        initialRequest={options.initialRequest}
         initialFilename={options.initialFilename}
         hidePreviousMessages={options.hidePreviousMessages}
       />

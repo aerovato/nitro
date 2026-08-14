@@ -1,6 +1,5 @@
-import { Box, useInput } from "ink";
+import { Box, Text, useInput } from "ink";
 import * as React from "react";
-import { CustomText } from "./CustomText";
 
 export interface CustomSelectOption {
   value: string;
@@ -56,12 +55,10 @@ export function CustomSelect({
         const dimColor = !isFocused;
         return (
           <Box key={option.value}>
-            <CustomText dimColor={isFocused}>
-              {isFocused ? "❯ " : "  "}
-            </CustomText>
-            <CustomText bold={isFocused} color={color} dimColor={dimColor}>
+            <Text dimColor={isFocused}>{isFocused ? "❯ " : "  "}</Text>
+            <Text bold={isFocused} color={color} dimColor={dimColor}>
               {option.label}
-            </CustomText>
+            </Text>
           </Box>
         );
       })}
