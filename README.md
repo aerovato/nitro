@@ -2,7 +2,7 @@
   <img src="https://raw.githubusercontent.com/aerovato/nitro/main/.github/README/banner.jpg" alt="Nitro Banner" />
 </p>
 
-> ##### Built with [Operator Memory](https://github.com/aerovato/operator)
+> ##### Built with [Operator Memory](https://github.com/aerovato/operator-memory)
 
 #### Nitro: A tiny and efficient harness for running Bash commands.
 
@@ -141,4 +141,4 @@ rm -rf ~/.nitro
 
 ## Built with Operator
 
-This repository is maintained with [Operator Memory](https://github.com/aerovato/operator) — durable, agent-maintained documentation that lets AI agents work on the project with full context across sessions. The published brain lives in [`.operator-shared/`](.operator-shared/).
+This repository is maintained with [Operator Memory](https://github.com/aerovato/operator-memory) — durable, agent-maintained documentation that lets AI agents work on the project with full context across sessions. The published brain lives in [`.operator-shared/`](.operator-shared/).
