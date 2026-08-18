@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Box, Text, useApp } from "ink";
+import { Box, Text, render, useApp } from "ink";
 
 import { CustomSelect, CustomSelectOption } from "../components";
 
@@ -8,7 +8,6 @@ import {
   setDefaultProvider,
   getDefaultProvider,
 } from "../logic/provider";
-import { renderWithColor } from "../utils";
 import { RED, GREEN, YELLOW } from "../colors";
 
 const CANCEL_OPTION_VALUE = "__cancel__";
@@ -97,6 +96,6 @@ export function ProviderDefaultScreen(): React.ReactElement {
 }
 
 export async function runProviderDefaultScreen(): Promise<void> {
-  const { waitUntilExit } = await renderWithColor(<ProviderDefaultScreen />);
+  const { waitUntilExit } = render(<ProviderDefaultScreen />);
   await waitUntilExit();
 }

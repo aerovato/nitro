@@ -1,7 +1,6 @@
 import * as React from "react";
 import { getSystemPrompt, loadSettings, Settings } from "../logic/settings";
-import { ProviderInfoWithName } from "../logic/provider";
-import { getDefaultChatProvider } from "../logic/llm";
+import { getDefaultProvider, ProviderInfoWithName } from "../logic/provider";
 import { exitWithError } from "../utils";
 
 export interface ChatConfig {
@@ -23,7 +22,7 @@ export function ChatConfigProvider({
 }: ChatConfigProviderProps): React.ReactElement {
   const [config] = React.useState<ChatConfig>(() => {
     const settings = { ...loadSettings(), ...settingsOverride };
-    const provider = getDefaultChatProvider();
+    const provider = getDefaultProvider();
     const systemPrompt = getSystemPrompt();
 
     if (provider === null) {

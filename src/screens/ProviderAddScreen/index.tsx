@@ -1,7 +1,6 @@
 import * as React from "react";
-import { Box, Text, useApp } from "ink";
+import { Box, Text, render, useApp } from "ink";
 import { CustomSelect, CustomTextInput } from "../../components";
-import { renderWithColor } from "../../utils";
 import { RED, GREEN, YELLOW } from "../../colors";
 import { useProviderAddState } from "../../hooks/useProviderAddState";
 import {
@@ -248,6 +247,6 @@ export function ProviderAddScreen(): React.ReactElement {
 }
 
 export async function runProviderAddScreen(): Promise<void> {
-  const { waitUntilExit } = await renderWithColor(<ProviderAddScreen />);
+  const { waitUntilExit } = render(<ProviderAddScreen />);
   await waitUntilExit();
 }

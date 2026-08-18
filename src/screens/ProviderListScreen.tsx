@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Box, Text } from "ink";
+import { Box, Text, render } from "ink";
 
 import {
   getDefaultProvider,
@@ -7,7 +7,6 @@ import {
   listProviders,
   type ProviderInfoWithName,
 } from "../logic/provider";
-import { renderWithColor } from "../utils";
 import { AQUA, PURPLE } from "../colors";
 
 function censorApiKey(apiKey: string): string {
@@ -90,6 +89,6 @@ export function ProviderListScreen(): React.ReactElement {
 }
 
 export async function runProviderListScreen(): Promise<void> {
-  const { waitUntilExit } = await renderWithColor(<ProviderListScreen />);
+  const { waitUntilExit } = render(<ProviderListScreen />);
   await waitUntilExit();
 }

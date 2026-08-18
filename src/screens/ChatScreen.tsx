@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Box, Text, useApp } from "ink";
+import { Box, Text, render, useApp } from "ink";
 
 import { runProviderDefaultScreen } from "./ProviderDefaultScreen";
 import {
@@ -11,7 +11,6 @@ import {
 
 import { getDefaultProvider } from "../logic/provider";
 import { useChatState } from "../hooks/useChatState";
-import { renderWithColor } from "../utils";
 import { GREEN, YELLOW } from "../colors";
 import {
   ChatConfigProvider,
@@ -145,7 +144,7 @@ export async function runChatScreen(
     ? { alwaysConfirm: true }
     : undefined;
 
-  const { waitUntilExit } = await renderWithColor(
+  const { waitUntilExit } = render(
     <ChatConfigProvider settingsOverride={settingsOverride}>
       <ChatScreen
         initialRequest={options.initialRequest}

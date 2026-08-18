@@ -1,8 +1,7 @@
 import * as React from "react";
-import { Box, Text, useApp } from "ink";
+import { Box, Text, render, useApp } from "ink";
 
 import { CustomSelect, CustomSelectOption } from "../components";
-import { renderWithColor } from "../utils";
 import { YELLOW } from "../colors";
 
 const CANCEL_VALUE = "__cancel__";
@@ -77,7 +76,7 @@ function ProviderRouterScreenInternal({
 export async function runProviderRouterScreen(): Promise<ProviderSubcommand | null> {
   let result: ProviderSubcommand | null = null;
 
-  const { waitUntilExit } = await renderWithColor(
+  const { waitUntilExit } = render(
     <ProviderRouterScreenInternal
       onSelect={subcommand => {
         result = subcommand;

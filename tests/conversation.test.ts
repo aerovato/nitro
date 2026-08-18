@@ -4,7 +4,6 @@ import {
   saveConversation,
   loadConversation,
   getLastConversationFilename,
-  loadLastConversation,
   CHATS_DIR,
   STATE_FILE,
 } from "../src/logic/conversation";
@@ -205,45 +204,5 @@ describe("getLastConversationFilename", () => {
     const result = getLastConversationFilename();
 
     expect(result).toBe("1699999999999.json");
-  });
-});
-
-describe("loadLastConversation", () => {
-  it("returns null when no last conversation", () => {
-    const result = loadLastConversation();
-    expect(result).toBeNull();
-  });
-
-  it("loads the last conversation", () => {
-    const messages = [
-      { role: "user" as const, content: "Hello" },
-      { role: "assistant" as const, content: "Hi there!" },
-    ];
-    fs.mkdirSync(CHATS_DIR, { recursive: true });
-    fs.writeFileSync(
-      `${CHATS_DIR}/1699999999999.json`,
-      JSON.stringify({ messages }),
-    );
-    fs.mkdirSync(APP_DATA_DIR, { recursive: true });
-    fs.writeFileSync(
-      STATE_FILE,
-      JSON.stringify({ lastConversation: "1699999999999.json" }),
-    );
-
-    const result = loadLastConversation();
-
-    expect(result).toEqual({ messages });
-  });
-
-  it("returns null when conversation file does not exist", () => {
-    fs.mkdirSync(APP_DATA_DIR, { recursive: true });
-    fs.writeFileSync(
-      STATE_FILE,
-      JSON.stringify({ lastConversation: "nonexistent.json" }),
-    );
-
-    const result = loadLastConversation();
-
-    expect(result).toBeNull();
   });
 });

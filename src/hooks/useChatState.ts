@@ -7,7 +7,7 @@ import type {
 
 import type { ProviderInfoWithName } from "../logic/provider";
 import type { Settings } from "../logic/settings";
-import { transformInput } from "../logic/llm";
+import { transformInput } from "../utils";
 import { prependWorkspaceContext } from "../logic/environment";
 import { saveConversation, loadConversation } from "../logic/conversation";
 import { exitWithError } from "../utils";

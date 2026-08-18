@@ -1,8 +1,7 @@
 import * as React from "react";
-import { Box, Text, useApp } from "ink";
+import { Box, Text, render, useApp } from "ink";
 
 import { CustomSelect } from "../components";
-import { renderWithColor } from "../utils";
 import { GREEN, RED } from "../colors";
 import { loadSettings, saveSettings } from "../logic/settings";
 import { EULA_TEXT, EULA_VERSION } from "../eula";
@@ -77,7 +76,7 @@ export function EulaScreen(): React.ReactElement {
 }
 
 export async function runEulaScreen(): Promise<boolean> {
-  const { waitUntilExit } = await renderWithColor(<EulaScreen />);
+  const { waitUntilExit } = render(<EulaScreen />);
   await waitUntilExit();
   const settings = loadSettings();
   return settings.agreedToEula === EULA_VERSION;
