@@ -2,6 +2,8 @@
   <img src="https://raw.githubusercontent.com/aerovato/nitro/main/.github/README/banner.jpg" alt="Nitro Banner" />
 </p>
 
+> ##### Built with [Operator Memory](https://github.com/aerovato/operator)
+
 #### Nitro: A tiny and efficient harness for running Bash commands.
 
 ## Quickstart
@@ -136,3 +138,7 @@ Nitro stores configuration in `~/.nitro/`:
 npm uninstall -g @aerovato/nitro
 rm -rf ~/.nitro
 ```
+
+## Built with Operator
+
+This repository is maintained with [Operator Memory](https://github.com/aerovato/operator) — durable, agent-maintained documentation that lets AI agents work on the project with full context across sessions. The published brain lives in [`.operator-shared/`](.operator-shared/).
