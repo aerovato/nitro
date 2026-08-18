@@ -85,12 +85,12 @@ describe("getProvider", () => {
 });
 
 describe("getDefaultProvider", () => {
-  it("returns undefined when no default provider is set", () => {
+  it("returns null when no default provider is set", () => {
     const provider = getDefaultProvider();
-    expect(provider).toBeUndefined();
+    expect(provider).toBeNull();
   });
 
-  it("returns undefined when default provider is set but provider does not exist", () => {
+  it("returns null when default provider is set but provider does not exist", () => {
     fs.mkdirSync(APP_DATA_DIR, { recursive: true });
     fs.writeFileSync(
       AUTH_FILE,
@@ -101,7 +101,7 @@ describe("getDefaultProvider", () => {
     );
 
     const provider = getDefaultProvider();
-    expect(provider).toBeUndefined();
+    expect(provider).toBeNull();
   });
 
   it("returns default provider info when set and exists", () => {

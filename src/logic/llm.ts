@@ -1,5 +1,3 @@
-import { exit } from "node:process";
-
 import {
   streamText,
   type ToolSet,
@@ -13,11 +11,7 @@ import {
 import { createOpenAI, OpenAIResponsesProviderOptions } from "@ai-sdk/openai";
 import { AnthropicProviderOptions, createAnthropic } from "@ai-sdk/anthropic";
 
-import {
-  getDefaultProvider,
-  type ProviderInfoWithName,
-  type ProviderInfo,
-} from "./provider";
+import { type ProviderInfoWithName, type ProviderInfo } from "./provider";
 import { type ReasoningEffort } from "./settings";
 
 function addCacheControl<T extends ModelMessage>(
@@ -81,23 +75,23 @@ function getProviderOptions(
   }
   switch (provider.apiType) {
     case "openai-compatible": {
-      const result: OpenAICompatibleProviderOptions = {
+      const options: OpenAICompatibleProviderOptions = {
         reasoningEffort: reasoningEffort,
       };
-      return result;
+      return options;
     }
     case "openai-responses": {
-      const result: OpenAIResponsesProviderOptions = {
+      const options: OpenAIResponsesProviderOptions = {
         reasoningEffort: reasoningEffort,
       };
-      return result;
+      return options;
     }
     case "anthropic": {
-      const result: AnthropicProviderOptions = {
+      const options: AnthropicProviderOptions = {
         thinking: { type: "adaptive" },
         effort: reasoningEffort,
       };
-      return result;
+      return options;
     }
   }
 }
@@ -139,20 +133,4 @@ export function generateCompletion(
       [provider.name]: providerOptions,
     },
   });
-}
-
-export function getDefaultChatProvider(): ProviderInfoWithName | null {
-  return getDefaultProvider() ?? null;
-}
-
-export function transformInput(input: string): string {
-  const trimmed = input.trim();
-
-  switch (trimmed) {
-    case "/exit":
-      exit(0);
-      break;
-    default:
-      return input;
-  }
 }

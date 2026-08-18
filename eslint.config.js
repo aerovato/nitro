@@ -44,11 +44,6 @@ export default defineConfig(
         {
           paths: [
             {
-              name: "ink",
-              importNames: ["render"],
-              message: "Use renderWithColor() from utils.ts instead.",
-            },
-            {
               name: "ink-text-input",
               importNames: ["default"],
               message: "Use CustomTextInput.tsx instead.",

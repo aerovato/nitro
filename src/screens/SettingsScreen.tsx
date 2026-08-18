@@ -1,9 +1,8 @@
 import * as React from "react";
-import { Box, Text, useApp } from "ink";
+import { Box, Text, render, useApp } from "ink";
 import { Select } from "@inkjs/ui";
 
 import { CustomSelect, CustomTextInput } from "../components";
-
 import {
   loadSettings,
   saveSettings,
@@ -11,7 +10,6 @@ import {
   type Settings,
   type SettingMeta,
 } from "../logic/settings";
-import { renderWithColor } from "../utils";
 import { RED } from "../colors";
 
 const DONE_VALUE = "__done__";
@@ -156,6 +154,6 @@ export function SettingsScreen(): React.ReactElement {
 }
 
 export async function runSettingsScreen(): Promise<void> {
-  const { waitUntilExit } = await renderWithColor(<SettingsScreen />);
+  const { waitUntilExit } = render(<SettingsScreen />);
   await waitUntilExit();
 }

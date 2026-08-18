@@ -1,6 +1,6 @@
 import { existsSync, unlinkSync } from "node:fs";
 import { BashPrompt } from "../../src/components/bash/BashPrompt";
-import { renderWithColor } from "../../src/utils";
+import { render } from "ink";
 import type { BashModelInput } from "../../src/tools/bash";
 
 /**
@@ -57,7 +57,7 @@ async function testBashPrompt() {
     function unmountApp() {
       cleanupFunctions.forEach(item => item());
     }
-    const { waitUntilExit, unmount, clear, cleanup } = await renderWithColor(
+    const { waitUntilExit, unmount, clear, cleanup } = render(
       <BashPrompt modelInput={input} onSubmit={unmountApp} />,
     );
     cleanupFunctions.push(cleanup, clear, unmount);

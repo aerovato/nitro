@@ -1,7 +1,6 @@
 import * as React from "react";
-import { Box, Text, useApp } from "ink";
+import { Box, Text, render, useApp } from "ink";
 import { CustomSelect, CustomTextInput } from "../../components";
-import { renderWithColor } from "../../utils";
 import { RED, GREEN, YELLOW } from "../../colors";
 import { useProviderEditState } from "../../hooks/useProviderEditState";
 import {
@@ -280,6 +279,6 @@ export function ProviderEditScreen(): React.ReactElement {
 }
 
 export async function runProviderEditScreen(): Promise<void> {
-  const { waitUntilExit } = await renderWithColor(<ProviderEditScreen />);
+  const { waitUntilExit } = render(<ProviderEditScreen />);
   await waitUntilExit();
 }

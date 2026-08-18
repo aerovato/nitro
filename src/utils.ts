@@ -1,15 +1,6 @@
 import { exit } from "node:process";
 
-import type React from "react";
-// eslint-disable-next-line no-restricted-imports
-import { Instance, render } from "ink";
 import chalk from "chalk";
-
-export function renderWithColor(
-  element: React.ReactElement,
-): Promise<Instance> {
-  return Promise.resolve(render(element));
-}
 
 /**
  * Expands tab characters into the correct number of spaces.
@@ -37,6 +28,18 @@ export function expandTabs(text: string, tabSize: number = 4): string {
   }
 
   return result;
+}
+
+export function transformInput(input: string): string {
+  const trimmed = input.trim();
+
+  switch (trimmed) {
+    case "/exit":
+      exit(0);
+      break;
+    default:
+      return input;
+  }
 }
 
 export function outputError(message: string): void {

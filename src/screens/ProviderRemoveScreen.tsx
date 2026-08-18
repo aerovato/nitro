@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Box, Text, useApp } from "ink";
+import { Box, Text, render, useApp } from "ink";
 
 import { CustomSelect, CustomSelectOption } from "../components";
 
@@ -8,7 +8,6 @@ import {
   removeProvider,
   getDefaultProvider,
 } from "../logic/provider";
-import { renderWithColor } from "../utils";
 import { RED, YELLOW } from "../colors";
 
 const CANCEL_OPTION_VALUE = "__cancel__";
@@ -123,6 +122,6 @@ export function ProviderRemoveScreen(): React.ReactElement {
 }
 
 export async function runProviderRemoveScreen(): Promise<void> {
-  const { waitUntilExit } = await renderWithColor(<ProviderRemoveScreen />);
+  const { waitUntilExit } = render(<ProviderRemoveScreen />);
   await waitUntilExit();
 }

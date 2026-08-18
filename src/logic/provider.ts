@@ -64,13 +64,13 @@ export function getProvider(name: string): ProviderInfo | undefined {
   return auth.providers[name];
 }
 
-export function getDefaultProvider(): ProviderInfoWithName | undefined {
+export function getDefaultProvider(): ProviderInfoWithName | null {
   const auth = loadAuth();
   if (!auth.defaultProvider) {
-    return undefined;
+    return null;
   }
   const info = auth.providers[auth.defaultProvider];
-  return info ? { ...info, name: auth.defaultProvider } : undefined;
+  return info ? { ...info, name: auth.defaultProvider } : null;
 }
 
 export function setDefaultProvider(name: string): boolean {

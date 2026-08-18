@@ -1,5 +1,5 @@
 import { AskPrompt } from "../../src/components/ask/AskPrompt";
-import { renderWithColor } from "../../src/utils";
+import { render } from "ink";
 import type { Question } from "../../src/tools/ask";
 
 const sampleQuestions: Question[] = [
@@ -34,7 +34,7 @@ const sampleQuestions: Question[] = [
 ];
 
 async function testAskPrompt() {
-  const { waitUntilExit } = await renderWithColor(
+  const { waitUntilExit } = render(
     <AskPrompt
       modelInput={{ questions: sampleQuestions }}
       onSubmit={responses => {

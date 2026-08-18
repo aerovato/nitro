@@ -126,11 +126,3 @@ export function getLastConversationFilename(): string | null {
   const state = loadStateFile();
   return state.lastConversation;
 }
-
-export function loadLastConversation(): Conversation | null {
-  const filename = getLastConversationFilename();
-  if (!filename) {
-    return null;
-  }
-  return loadConversation(filename);
-}
